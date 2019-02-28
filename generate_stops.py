@@ -31,41 +31,6 @@ colors = {
 
 
 class Generate():
-
-    # Takes stop IDs from a file and creates a Parsable Python Dictionary
-    @staticmethod
-    def get_stops():
-        count = 0
-        stop_dict = {}
-        stop_list = []
-        with open("google_transit/stops.txt") as f:
-            stops = csv.DictReader(f)
-            for stop in stops:
-                stop_dict[stop["stop_id"]] = {}
-                stop_dict[stop["stop_id"]]["stop_name"] = stop["stop_name"]
-                #print stop["stop_id"]
-        f.close()
-        for key in stop_dict.keys():
-            try:
-                int(key[-2:])
-                if key[0] == "S" or key[0] == "9" or key[0] == "H":
-                    #print key[0]
-                    continue
-                elif stop_dict[key]["stop_name"] in stop_list:
-                    #print stop_dict[key]["stop_name"], key
-                    continue
-                else:
-                    #print stop_dict[key]["stop_name"]
-                    stop_list.append(stop_dict[key]["stop_name"])
-                    count += 1
-            except ValueError:
-                continue
-        #print stop_dict
-        #print len(stop_list)
-        #print count
-        #print stop_list
-        return stop_dict
-
     # Pull real time train data from google transit
     @staticmethod
     def update_train_info():
