@@ -1,5 +1,3 @@
-
-
 class Lights():
 
     @staticmethod
@@ -13,9 +11,12 @@ class Lights():
 
     @staticmethod
     def run(stops, old_stops):
+        off = []
+        on = []
         for stop in stops:
-            print ""
-            print "There is a " + str(stop[1]) + " train at " + str(stop[0])
-        #on = set(stops) - set(old_stops)
-        #off = set(old_stops) - set(stops)
-        #Lights.control(on, off)
+            if stop not in old_stops:
+                on.append(stop)
+        for stop in old_stops:
+            if stop not in stops:
+                off.append(stop)
+        Lights.control(on, off)
