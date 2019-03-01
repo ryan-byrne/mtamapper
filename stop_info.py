@@ -10,7 +10,7 @@ with open("google_transit/stops.txt") as f:
             continue
         else:
             sorted_stops.append(stop["stop_id"])
-            
+
 f.close()
 
 print len(sorted_stops)
