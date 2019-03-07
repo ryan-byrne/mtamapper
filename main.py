@@ -1,6 +1,6 @@
-import time, opc, sys, csv
+import time, opc, sys, csv, json
 from generate_stops import Generate
-from lights import Lights as l
+from lights import Lights
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 
@@ -18,7 +18,6 @@ def get_stops():
             else:
                 continue
     return stop_dict
-
 
 def TEST_CONNECT():
     #-------------------------------------------------------------------------------
@@ -53,15 +52,22 @@ def TEST_CONNECT():
     return client
 
 if __name__ == '__main__':
+    print "Opening the LED testing client..."
     client = TEST_CONNECT()
     old_stops = []
+    print "Beginning Timer..."
     t = time.time()
+    print "Populating a dictionary of stops"
     stop_dict = get_stops()
+    #l.run(stops, old_stops, stop_dict, client)
     while True:
-        stops = Generate.run()
+        print "Retriving current stops..."
+        current_stops = Generate.run()
         #print stops
-        l.run(stops, old_stops, stop_dict, client)
-        old_stops = stops
+        print "Sending commands to lights..."
+        Lights.run(current_stops, old_stops, client)
+        old_stops = current_stops
         elapsed = time.time() - t
-        print "Running for: " + str(elapsed/60) + " minutes"
-        time.sleep(1)
+        print "Complete!"
+        print "Running for: " + str(round(elapsed/60,2)) + " minutes"
+        time.sleep(0.05)
