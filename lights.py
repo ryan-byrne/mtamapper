@@ -68,6 +68,9 @@ class Lights():
     def control(on, off):
         coordinates = []
         color_values = []
+        print "Turn on:", on
+        print "Turn off:", off
+        """
         # Parses the list of "on" trains
         for stop in on:
             if stop == "R65":
@@ -99,6 +102,7 @@ class Lights():
 
         #print pixels
         return pixels
+        """
 
     @staticmethod
     def run(stops, old_stops, client):
@@ -111,4 +115,4 @@ class Lights():
             if stop not in stops:
                 off.append(stop)
         pixels = Lights.control(on, off)
-        client.put_pixels(pixels, channel=0)
+        #client.put_pixels(pixels, channel=0)

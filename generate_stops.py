@@ -9,6 +9,7 @@ class Generate():
     def update_train_info():
         current_trains = []
         id_array = ["1", "26", "16", "21", "2", "31", "36", "51"]
+        exclude = ["9", "S"]
         key = "aec131a835263208ee94b402590bb930"
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
@@ -16,8 +17,9 @@ class Generate():
             feed.ParseFromString(response.read())
             for entity in feed.entity:
                 for stop in entity.trip_update.stop_time_update:
-                    route = stop.stop_id[:-1]
-                    if stop.stop_id[:3] == "R60":
+                    s = stop.stop_id[:-1]
+                    r = stop.stop_id[0]
+                    if s == "R60" or s in current_trains or r in exclude:
                         continue
                     else:
                         current_trains.append(stop.stop_id[:-1])
