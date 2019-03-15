@@ -1,16 +1,20 @@
 import csv, json
 
+exclude = ["S", "9"]
+
 def update_json():
     stop_dict = {}
     with open("google_transit/stops.txt") as f:
         stops = csv.DictReader(f)
         for stop in stops:
-            id = stop["stop_id"]
-            if len(id) == 4 or id in stop_dict.keys() or id in ["9", "H", "S"]:
+            id = stop["stop_id"][:3]
+            if id[0] in exclude or id in stop_dict.keys():
                 continue
+            else:
+                stop_dict[id] = {}
             lat = round(20*(float(stop["stop_lat"])-40.7), 5)
             lon = round(20*(float(stop["stop_lon"])+73.9), 5)
-            stop_dict[id] = [lat, 0, lon]
+            stop_dict[id]["coor"] = [lat, 0, lon]
     f.close()
     with open('mta.json', 'w') as f:
         points = []

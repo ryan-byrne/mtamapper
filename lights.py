@@ -1,19 +1,6 @@
 import sys, opc, json
 
 status = {}
-
-# Creates an object to store train statuses
-with open("mta.json") as f:
-    mta = json.loads(f.read())
-    for item in mta:
-        s = item.keys()[0]
-        #print s
-        #print item[s]
-        status[s] = {}
-        status[s]['color'] = [(0, 0, 0)]
-        status[s]['coor'] = item[s]
-f.close()
-
 colors = {
     "4":"#00933C",
     "5":"#00933C",
@@ -43,6 +30,24 @@ colors = {
     "S":"#0039A6",
     "H":"#0039A6"
 }
+exclude = ["S", "9"]
+# Creates an object to store train statuses
+with open("mta.json") as f:
+    mta = json.loads(f.read())
+    for item in mta:
+        s = item.keys()[0]
+        r = s[0]
+        if r in exclude:
+            continue
+        #print s
+        #print item[s]
+        status[s] = {}
+        status[s]['color'] = (0, 0, 0)
+        status[s]['coor'] = item[s]
+    for item in status.keys():
+        print item, status[item]
+    print len(status.keys())
+f.close()
 
 def color_blend(color_array):
     #print color_array
@@ -68,41 +73,21 @@ class Lights():
     def control(on, off):
         coordinates = []
         color_values = []
-        print "Turn on:", on
-        print "Turn off:", off
-        """
-        # Parses the list of "on" trains
-        for stop in on:
-            if stop == "R65":
+        print "Turn on:"
+        for s in on:
+            if s[1] == "R60" or s[1] == "R65":
                 continue
-            route = stop[0]
-            new_color = hex_to_rgb(colors[route])
-            #print stop, "On", new_color
-            if status[stop]['color'] == [(0, 0, 0)]:
-                status[stop]['color'] = [new_color]
-            elif new_color in status[stop]['color']:
+            current_color = status[s[1]]["color"]
+            print current_color
+            print "Send ", colors[s[0][0]], " to ", s[1]
+        print "Turn off:"
+        for s in off:
+            if s[1] == "R60" or s[1] == "R65":
                 continue
-            else:
-                status[stop]['color'].append(new_color)
-        # Does the same for "off" trains
-        for stop in off:
-            if stop == "R65":
-                continue
-            route = stop[0]
-            new_color = hex_to_rgb(colors[route])
-            #print stop, "Off", new_color
-            if len(status[stop]['color']) > 1:
-                status[stop]['color'].remove(new_color)
-            else:
-                color_array = [(0, 0, 0)]
-                current_color = color_array[0]
-        pixels = []
-        for stop in status.keys():
-            pixels.append(status[stop]['color'][0])
+            current_color = status[s[1]]["color"]
+            print current_color
+            print "Remove ", colors[s[0][0]], " from ", s[1]
 
-        #print pixels
-        return pixels
-        """
 
     @staticmethod
     def run(stops, old_stops, client):
