@@ -4,21 +4,6 @@ from lights import Lights
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 
-def get_stops():
-    stop_dict = {}
-    with open("google_transit/stops.txt") as f:
-        stops = csv.DictReader(f)
-        for stop in stops:
-            id = stop["stop_id"]
-            if id not in stop_dict.keys() and id[0] not in ["S", "H", "9"]:
-                stop_dict[stop["stop_id"]] = {}
-                stop_dict[stop["stop_id"]]["stop_name"] = stop["stop_name"]
-                stop_dict[stop["stop_id"]]["lat"] = round(20*(float(stop["stop_lat"])-40.7), 5)
-                stop_dict[stop["stop_id"]]["lon"] = round(20*(float(stop["stop_lon"])+73.9), 5)
-            else:
-                continue
-    return stop_dict
-
 def TEST_CONNECT():
     #-------------------------------------------------------------------------------
     # handle command line
@@ -46,8 +31,8 @@ def TEST_CONNECT():
 
     #-------------------------------------------------------------------------------
     # send pixels
-
-    print('    sending pixels forever (control-c to exit)...')
+    print
+    print(' Ready to send pixels!')
     print('')
     return client
 
@@ -57,8 +42,6 @@ if __name__ == '__main__':
     old_stops = []
     print "Beginning Timer..."
     t = time.time()
-    print "Populating a dictionary of stops"
-    stop_dict = get_stops()
     #l.run(stops, old_stops, stop_dict, client)
     while True:
         print "Retriving current stops..."
@@ -70,4 +53,3 @@ if __name__ == '__main__':
         elapsed = time.time() - t
         print "Complete!"
         print "Running for: " + str(round(elapsed/60,2)) + " minutes"
-        time.sleep(0.05)

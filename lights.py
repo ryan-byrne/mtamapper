@@ -32,7 +32,7 @@ colors = {
 }
 exclude = ["S", "9"]
 # Creates an object to store train statuses
-with open("mta.json") as f:
+with open("mta.json", "r") as f:
     mta = json.loads(f.read())
     for item in mta:
         s = item.keys()[0]
@@ -43,20 +43,22 @@ with open("mta.json") as f:
         #print item[s]
         status[s] = {}
         status[s]['color'] = (0, 0, 0)
-        status[s]['coor'] = item[s]
-    for item in status.keys():
-        print item, status[item]
-    print len(status.keys())
+        status[s]['coor'] = item[s]["coor"]
+        status[s]['on'] = []
+    status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
 f.close()
 
 def color_blend(color_array):
     #print color_array
-    a = color_array[0]
-    b = color_array[1]
-    r = (int(a[0])+int(b[0]))/2
-    g = (int(a[1])+int(b[1]))/2
-    b = (int(a[2])+int(b[2]))/2
-    return (r, g, b)
+    r = 0
+    g = 0
+    b = 0
+    for c in color_array:
+        r += int(hex_to_rgb(c)[0])
+        g += int(hex_to_rgb(c)[1])
+        b += int(hex_to_rgb(c)[2])
+    l = len(color_array)
+    return (r/l, g/l, b/l)
 
 def hex_to_rgb(hex):
      #print hex
@@ -64,40 +66,55 @@ def hex_to_rgb(hex):
      hlen = len(hex)
      return tuple(int(hex[i:i+hlen/3], 16) for i in range(0, hlen, hlen/3))
 
-def pixel_color(coord, pixel_values):
-    return pixel_values
-
 class Lights():
 
     @staticmethod
-    def control(on, off):
-        coordinates = []
-        color_values = []
-        print "Turn on:"
-        for s in on:
-            if s[1] == "R60" or s[1] == "R65":
-                continue
-            current_color = status[s[1]]["color"]
-            print current_color
-            print "Send ", colors[s[0][0]], " to ", s[1]
-        print "Turn off:"
-        for s in off:
-            if s[1] == "R60" or s[1] == "R65":
-                continue
-            current_color = status[s[1]]["color"]
-            print current_color
-            print "Remove ", colors[s[0][0]], " from ", s[1]
+    def control():
+        for stop in status.keys():
+            #print stop, status[stop]['on']
+            train_array = status[stop]['on']
+            color_array = []
+            for t in train_array:
+                c = colors[t]
+                if c not in color_array:
+                    color_array.append(c)
+                else:
+                    continue
+            if len(color_array) == 0:
+                status[stop]['color'] = (0, 0, 0)
+            elif len(color_array) == 1:
+                status[stop]['color'] = hex_to_rgb(color_array[0])
+            else:
+                color = color_blend(color_array)
+                status[stop]['color'] = color
+        pixel_array = []
+        for stop in status:
+            pixel_array.append(status[stop]["color"])
+        return pixel_array
+
 
 
     @staticmethod
     def run(stops, old_stops, client):
-        off = []
-        on = []
-        for stop in stops:
-            if stop not in old_stops:
-                on.append(stop)
-        for stop in old_stops:
-            if stop not in stops:
-                off.append(stop)
-        pixels = Lights.control(on, off)
-        #client.put_pixels(pixels, channel=0)
+        for s in stops:
+            if s not in old_stops:
+                #print "Turn on ", s[0], " at ", s[1]
+                try:
+                    if s[0] not in status[s[1]]["on"]:
+                        status[s[1]]["on"].append(s[0])
+                    else:
+                        continue
+                except KeyError:
+                    continue
+        for s in old_stops:
+            if s not in stops:
+                #print "Turn off ", s[0], " at ", s[1]
+                try:
+                    if s[0] not in status[s[1]]["on"]:
+                        continue
+                    else:
+                        status[s[1]]["on"].remove(s[0])
+                except KeyError:
+                    continue
+        pixels = Lights.control()
+        client.put_pixels(pixels, channel=0)

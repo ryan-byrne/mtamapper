@@ -1,25 +1,28 @@
 import csv, json
 
 exclude = ["S", "9"]
+status = {}
 
-def update_json():
-    stop_dict = {}
-    with open("google_transit/stops.txt") as f:
-        stops = csv.DictReader(f)
-        for stop in stops:
-            id = stop["stop_id"][:3]
-            if id[0] in exclude or id in stop_dict.keys():
-                continue
-            else:
-                stop_dict[id] = {}
-            lat = round(20*(float(stop["stop_lat"])-40.7), 5)
-            lon = round(20*(float(stop["stop_lon"])+73.9), 5)
-            stop_dict[id]["coor"] = [lat, 0, lon]
-    f.close()
-    with open('mta.json', 'w') as f:
-        points = []
-        for id in stop_dict.keys():
-            points.append({id:stop_dict[id]})
-        json.dump(points, f, ensure_ascii=False)
+with open("mta.json", "r") as f:
+    mta = json.loads(f.read())
+    for item in mta:
+        s = item.keys()[0]
+        r = s[0]
+        if r in exclude:
+            continue
+        #print s
+        #print item[s]
+        status[s] = {}
+        status[s]['color'] = (0, 0, 0)
+        status[s]['coor'] = item[s]["coor"]
+        status[s]['on'] = []
+    status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
 
-update_json()
+coor_array = []
+
+with open("resources/openpixelcontrol/layouts/mta.json", "w+") as f:
+    for stop in status:
+        coor = status[stop]["coor"]
+        coor_array.append({"point":coor})
+    json.dump(coor_array, f)
+f.close()
