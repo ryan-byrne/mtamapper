@@ -38,7 +38,8 @@ def TEST_CONNECT():
 
 if __name__ == '__main__':
     print "Opening the LED testing client..."
-    client = TEST_CONNECT()
+    #client = TEST_CONNECT()
+    client = opc.Client('localhost:7890')
     old_stops = []
     print "Beginning Timer..."
     t = time.time()

@@ -15,6 +15,10 @@ with open("mta.json", "r") as f:
         status[s] = {}
         status[s]['color'] = (0, 0, 0)
         status[s]['coor'] = item[s]["coor"]
+        new_coor = []
+        for item in status[s]['coor']:
+            new_coor.append(item)
+        status[s]["coor"] = new_coor
         status[s]['on'] = []
     status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
 

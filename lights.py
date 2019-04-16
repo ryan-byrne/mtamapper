@@ -86,13 +86,11 @@ class Lights():
                 status[stop]['color'] = hex_to_rgb(color_array[0])
             else:
                 color = color_blend(color_array)
-                status[stop]['color'] = color
+                status[stop]['color'] = (255, 255, 255)
         pixel_array = []
         for stop in status:
             pixel_array.append(status[stop]["color"])
         return pixel_array
-
-
 
     @staticmethod
     def run(stops, old_stops, client):
