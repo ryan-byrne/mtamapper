@@ -1,6 +1,7 @@
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 import urllib2, csv, time, json
+from urllib2 import URLError
 
 stops = []
 
@@ -15,7 +16,10 @@ class Generate():
         recording = False
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
-            response = urllib2.urlopen('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
+            try:
+                response = urllib2.urlopen('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
+            except URLError:
+                print "Error reading data from MTA datamine. Continuing..."
             try:
                 feed.ParseFromString(response.read())
             except DecodeError:
