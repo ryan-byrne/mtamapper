@@ -58,8 +58,11 @@ def color_blend(color_array):
         r += int(hex_to_rgb(c)[0])
         g += int(hex_to_rgb(c)[1])
         b += int(hex_to_rgb(c)[2])
-    l = len(color_array)
-    return (r/l, g/l, b/l)
+
+    fr = min(r, 255)
+    fg = min(g, 255)
+    fb = min(b, 255)
+    return (fr, fg, fb)
 
 def hex_to_rgb(hex):
      #print hex
@@ -87,7 +90,7 @@ class Lights():
                 status[stop]['color'] = hex_to_rgb(color_array[0])
             else:
                 color = color_blend(color_array)
-                status[stop]['color'] = (255, 255, 255)
+                status[stop]['color'] = color
         pixel_array = []
         for stop in status:
             pixel_array.append(status[stop]["color"])
