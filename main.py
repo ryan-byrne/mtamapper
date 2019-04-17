@@ -47,10 +47,8 @@ if __name__ == '__main__':
     while True:
         print "Retriving current stops..."
         current_stops = Generate.run()
-        #print stops
-        print "Sending commands to lights..."
         Lights.run(current_stops, old_stops, client)
         old_stops = current_stops
         elapsed = time.time() - t
-        print "Complete!"
+        time.sleep(1)
         print "Running for: " + str(round(elapsed/60,2)) + " minutes"

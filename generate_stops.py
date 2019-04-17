@@ -22,6 +22,7 @@ class Generate():
                 print "Error reading data from MTA datamine. Continuing..."
             try:
                 feed.ParseFromString(response.read())
+                print "Sending commands to the lights..."
             except DecodeError:
                 print "Error reading data from Google. Continuing..."
                 return []
