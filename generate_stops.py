@@ -24,8 +24,8 @@ class Generate():
                 feed.ParseFromString(response.read())
                 print "Sending commands to group ", id, "..."
             except DecodeError:
-                print "Error reading data from Google. Continuing..."
-                return []
+                print "Error reading group ", id," from Google. Continuing..."
+                continue
             for e in feed.entity:
                 r = e.trip_update.trip.route_id
                 if r in exclude:

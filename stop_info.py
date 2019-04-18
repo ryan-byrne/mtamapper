@@ -22,7 +22,7 @@ with open("mta.json", "r") as f:
                     x_diff = x1-x2
                     y_diff = y1-y2
                     dist = math.sqrt(x_diff**2 + y_diff**2)
-                    if dist < 0.04:
+                    if dist < 0.03:
                         if i1 in combine.keys():
                             if i2 in combine[i1]:
                                 continue
