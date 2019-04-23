@@ -159,4 +159,4 @@ class Lights():
                 except KeyError:
                     continue
         pixels = Lights.control()
-        client.put_pixels(pixels, channel=0)
+        #client.put_pixels(pixels, channel=0)
