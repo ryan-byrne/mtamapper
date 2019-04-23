@@ -163,4 +163,8 @@ class Lights():
                 except KeyError:
                     continue
         pixels = Lights.control()
-        client.put_pixels(pixels, channel=0)
+        fc = client.put_pixels(pixels, channel=0)
+        if not fc:
+            print "Cannot send pixels to FadeCandy Controller. Continuing..."
+        else:
+            print "Pixels sent to FadeCandy..."

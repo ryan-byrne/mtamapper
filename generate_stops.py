@@ -24,7 +24,8 @@ class Generate():
             t0 = time.time()
             print "Parsing response into Python Object"
             try:
-                feed.ParseFromString(response.content)
+                r = response.content
+                feed.ParseFromString(r)
             except DecodeError:
                 print "Error reading group ", id," from Google. Continuing..."
                 continue
