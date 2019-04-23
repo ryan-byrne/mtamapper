@@ -1,6 +1,6 @@
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
-import urllib2, csv, time, json
+import requests, csv, time, json
 from urllib2 import URLError
 
 stops = []
@@ -18,15 +18,17 @@ class Generate():
             feed = gtfs_realtime_pb2.FeedMessage()
             print "Retriving info from MTA datamine..."
             try:
-                response = urllib2.urlopen('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
+                response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
             except URLError:
                 print "Error reading data from MTA datamine. Continuing..."
+            t0 = time.time()
             print "Parsing response into Python Object"
             try:
-                feed.ParseFromString(response.read())
+                feed.ParseFromString(response.content)
             except DecodeError:
                 print "Error reading group ", id," from Google. Continuing..."
                 continue
+            print "Process took ", (time.time() - t0), " seconds"
             print "Generating list of current stops for array #", id
             for e in feed.entity:
                 r = e.trip_update.trip.route_id
