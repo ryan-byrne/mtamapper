@@ -1,4 +1,4 @@
-import csv, json, math
+import csv, json, math, collections
 
 exclude = ["S", "9"]
 status = {}
@@ -59,13 +59,28 @@ with open("mta.json", "r") as f:
         status[s]['on'] = []
     status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
 
-for item in status:
-    print item
+s = {}
+
+with open("google_transit/stops.txt", "r") as f:
+    stops = csv.DictReader(f)
+    for stop in stops:
+        s[stop["stop_id"]] = stop["stop_name"]
+f.close()
+
+od = collections.OrderedDict(sorted(status.items()))
+
+for stop in od:
+    try:
+        print stop, s[stop]
+    except KeyError:
+        continue
 
 coor_array = []
+"""
 with open("resources/openpixelcontrol/layouts/mta.json", "w+") as f:
-    for stop in status:
-        coor = status[stop]["coor"]
+    for stop in od:
+        coor = od[stop]["coor"]
         coor_array.append({"point":coor})
     json.dump(coor_array, f)
 f.close()
+"""

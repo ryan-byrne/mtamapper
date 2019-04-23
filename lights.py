@@ -1,6 +1,6 @@
-import sys, opc, json, math
+import sys, opc, json, math, collections
 
-status = {}
+dict = {}
 colors = {
     "4":"#00933C",
     "5":"#00933C",
@@ -43,11 +43,12 @@ with open("mta.json", "r") as f:
             continue
         #print s
         #print item[s]
-        status[s] = {}
-        status[s]['color'] = (0, 0, 0)
-        status[s]['coor'] = item[s]["coor"]
-        status[s]['on'] = []
-    status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
+        dict[s] = {}
+        dict[s]['color'] = (0, 0, 0)
+        dict[s]['coor'] = item[s]["coor"]
+        dict[s]['on'] = []
+    status = collections.OrderedDict(sorted(dict.items()))
+    #status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
     for s1 in mta:
         for i1 in s1:
             d_min = 10
@@ -76,7 +77,6 @@ with open("mta.json", "r") as f:
                                 combine[i2].append(i1)
                         else:
                             combine[i1] = [i2]
-
 f.close()
 
 def color_blend(color_array):
@@ -104,6 +104,7 @@ class Lights():
 
     @staticmethod
     def control():
+        count = 0
         for stop in status.keys():
             #print stop, status[stop]['on']
             """
@@ -123,13 +124,16 @@ class Lights():
             if len(color_array) == 0:
                 status[stop]['color'] = (0, 0, 0)
             elif len(color_array) == 1:
+                count += 1
                 status[stop]['color'] = hex_to_rgb(color_array[0])
             else:
+                count += 1
                 color = color_blend(color_array)
                 status[stop]['color'] = color
         pixel_array = []
         for stop in status:
             pixel_array.append(status[stop]["color"])
+        print "There are currently ", count, " lights on..."
         return pixel_array
 
     @staticmethod

@@ -43,5 +43,6 @@ class Generate():
         try:
             current_trains = Generate.update_train_info()
         except UnboundLocalError:
+            print "Recieved a corrupt message from the Data Feed. Retrying..."
             return
         return current_trains

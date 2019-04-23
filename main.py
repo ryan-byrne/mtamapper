@@ -50,5 +50,4 @@ if __name__ == '__main__':
         Lights.run(current_stops, old_stops, client)
         old_stops = current_stops
         elapsed = time.time() - t
-        time.sleep(1)
         print "Running for: " + str(round(elapsed/60,2)) + " minutes"
