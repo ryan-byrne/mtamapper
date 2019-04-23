@@ -16,16 +16,18 @@ class Generate():
         recording = False
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
+            print "Retriving info from MTA datamine..."
             try:
                 response = urllib2.urlopen('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
             except URLError:
                 print "Error reading data from MTA datamine. Continuing..."
+            print "Parsing response into Python Object"
             try:
                 feed.ParseFromString(response.read())
-                print "Sending commands to group ", id, "..."
             except DecodeError:
                 print "Error reading group ", id," from Google. Continuing..."
                 continue
+            print "Generating list of current stops for array #", id
             for e in feed.entity:
                 r = e.trip_update.trip.route_id
                 if r in exclude:
