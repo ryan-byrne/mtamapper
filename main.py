@@ -3,7 +3,6 @@ from generate_stops import Generate
 from lights import Lights
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
-
 if __name__ == '__main__':
     print "Opening the LED FadeCandy client..."
     client = opc.Client('localhost:7890')

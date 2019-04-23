@@ -18,7 +18,7 @@ class Generate():
             feed = gtfs_realtime_pb2.FeedMessage()
             print "Retriving info from MTA datamine..."
             try:
-                response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, 'rb')
+                response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id)
             except URLError:
                 print "Error reading data from MTA datamine. Continuing..."
             t0 = time.time()
