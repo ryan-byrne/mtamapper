@@ -1,4 +1,4 @@
-import json, math
+import json, math, csv
 
 with open("mta.json", "r") as f:
     mta = json.loads(f.read())
@@ -23,7 +23,7 @@ for s1 in mta:
                 x_diff = x1-x2
                 y_diff = y1-y2
                 dist = math.sqrt(x_diff**2 + y_diff**2)
-                if dist < 0.03:
+                if dist < 0.04:
                     if i1 in combine.keys():
                         if i2 in combine[i1]:
                             continue
@@ -37,4 +37,13 @@ for s1 in mta:
                     else:
                         combine[i1] = [i2]
 
+with open("google_transit/stops.txt") as f:
+    stops = csv.DictReader(f)
+    for stop in stops:
+        id = stop["stop_id"][:3]
+        name = stop["stop_name"]
+        for item in combine.keys():
+            if id == item:
+                print name, id
+f.close()
 #print closest["R29"]["A41"]

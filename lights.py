@@ -63,7 +63,7 @@ with open("mta.json", "r") as f:
                     x_diff = x1-x2
                     y_diff = y1-y2
                     dist = math.sqrt(x_diff**2 + y_diff**2)
-                    if dist < 0.03:
+                    if dist < 0.04:
                         if i1 in combine.keys():
                             if i2 in combine[i1]:
                                 continue
@@ -106,6 +106,12 @@ class Lights():
     def control():
         for stop in status.keys():
             #print stop, status[stop]['on']
+            """
+            for s1 in combine.keys():
+                for s2 in combine[s1]:
+                    if stop == s2:
+                        status[stop]['on']
+            """
             train_array = status[stop]['on']
             color_array = []
             for t in train_array:

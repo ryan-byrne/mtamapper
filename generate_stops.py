@@ -40,5 +40,8 @@ class Generate():
     # Generate the list of Station IDs currently with trains
     @staticmethod
     def run():
-        current_trains = Generate.update_train_info()
+        try:
+            current_trains = Generate.update_train_info()
+        except UnboundLocalError:
+            return
         return current_trains
