@@ -35,7 +35,9 @@ exclude = ["S", "9"]
 combine = {}
 # Creates an object to store train statuses
 with open("mta.json", "r") as f:
+    print "Reading mta.json into Python Object..."
     mta = json.loads(f.read())
+    print "Creating unordered dictionary..."
     for item in mta:
         s = item.keys()[0]
         r = s[0]
@@ -47,8 +49,10 @@ with open("mta.json", "r") as f:
         dict[s]['color'] = (0, 0, 0)
         dict[s]['coor'] = item[s]["coor"]
         dict[s]['on'] = []
+    print "Sorting dictionary..."
     status = collections.OrderedDict(sorted(dict.items()))
     #status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
+    print "Checking for combinations..."
     for s1 in mta:
         for i1 in s1:
             d_min = 10
@@ -159,4 +163,4 @@ class Lights():
                 except KeyError:
                     continue
         pixels = Lights.control()
-        #client.put_pixels(pixels, channel=0)
+        client.put_pixels(pixels, channel=0)

@@ -6,8 +6,7 @@ from lights import Lights
 
 if __name__ == '__main__':
     print "Opening the LED FadeCandy client..."
-    #client = opc.Client('localhost:7890')
-    client = ""
+    client = opc.Client('localhost:7890')
     old_stops = []
     print "Beginning Timer..."
     t = time.time()
