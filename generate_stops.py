@@ -15,6 +15,7 @@ class Generate():
         exclude = ["9", "S", "FS", "", "GS"]
         recording = False
         print "Updating train info..."
+        t0 = time.time()
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
             #print "Retriving info from MTA datamine..."
@@ -22,7 +23,6 @@ class Generate():
                 response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id)
             except URLError:
                 print "Error reading data from MTA datamine. Continuing..."
-            t0 = time.time()
             #print "Parsing response into Python Object"
             try:
                 r = response.content
