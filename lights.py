@@ -137,7 +137,7 @@ class Lights():
         pixel_array = []
         for stop in status:
             pixel_array.append(status[stop]["color"])
-        print "There are currently ", count, " lights on..."
+        #print "There are currently ", count, " lights on..."
         return pixel_array
 
     @staticmethod
@@ -167,4 +167,4 @@ class Lights():
         if not fc:
             print "Cannot send pixels to FadeCandy Controller. Continuing..."
         else:
-            print "Pixels sent to FadeCandy..."
+            print "Sending pixels to FadeCandy..."

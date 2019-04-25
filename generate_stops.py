@@ -14,23 +14,23 @@ class Generate():
         key = "aec131a835263208ee94b402590bb930"
         exclude = ["9", "S", "FS", "", "GS"]
         recording = False
+        print "Updating train info..."
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
-            print "Retriving info from MTA datamine..."
+            #print "Retriving info from MTA datamine..."
             try:
                 response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id)
             except URLError:
                 print "Error reading data from MTA datamine. Continuing..."
             t0 = time.time()
-            print "Parsing response into Python Object"
+            #print "Parsing response into Python Object"
             try:
                 r = response.content
                 feed.ParseFromString(r)
             except DecodeError:
                 print "Error reading group ", id," from Google. Continuing..."
                 continue
-            print "Process took ", (time.time() - t0), " seconds"
-            print "Generating list of current stops for array #", id
+            #print "Generating list of current stops for array #", id
             for e in feed.entity:
                 r = e.trip_update.trip.route_id
                 if r in exclude:
@@ -40,6 +40,7 @@ class Generate():
                         s = stops.stop_id[:-1]
                         break
                     current_trains.append([r, s])
+        print "Train update took ", (time.time() - t0), " seconds"
         return current_trains
 
     # Generate the list of Station IDs currently with trains
