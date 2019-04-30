@@ -6,7 +6,7 @@ from lights import Lights
 if __name__ == '__main__':
     print "Starting the FadeCandy Server..."
     subprocess.Popen(["sudo", "fcserver", "/usr/local/bin/fcserver.json"])
-    print "Opening the LED FadeCandy client..."
+    print "Connect to the LED FadeCandy client..."
     client = opc.Client('localhost:7890')
     old_stops = []
     print "Beginning Timer..."
