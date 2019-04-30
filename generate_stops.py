@@ -44,7 +44,16 @@ class Generate():
                         break
                     current_trains.append([r, s])
             create_time = time.time()
+<<<<<<< HEAD
         print "Generating trains took ", (time.time() - t0), " seconds"
+=======
+
+            print "feed time: ", (feed_time - t0)*1000
+            print "request time: ", (request_time - t0)*1000
+            print "parse time: ", (parse_time - t0)*1000
+            print "create time: ", (create_time - t0)*1000
+            print "-"*100
+>>>>>>> 8052c67c91f72d68a94be234b95dc05d2159e597
         return current_trains
 
     # Generate the list of Station IDs currently with trains
