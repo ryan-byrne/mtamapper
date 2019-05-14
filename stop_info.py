@@ -4,7 +4,7 @@ exclude = ["S", "9"]
 status = {}
 combine = {}
 combine_list = []
-
+"""
 with open("mta.json", "r") as f:
     mta = json.loads(f.read())
     for s1 in mta:
@@ -58,7 +58,6 @@ with open("mta.json", "r") as f:
         status[s]['coor'] = coor
         status[s]['on'] = []
     status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
-
 s = {}
 
 with open("google_transit/stops.txt", "r") as f:
@@ -76,11 +75,21 @@ for stop in od:
         continue
 
 coor_array = []
-"""
+
+with open("combine.json", "w+") as f:
+    json.dump(combine, f)
+
+
 with open("resources/openpixelcontrol/layouts/mta.json", "w+") as f:
     for stop in od:
         coor = od[stop]["coor"]
         coor_array.append({"point":coor})
     json.dump(coor_array, f)
 f.close()
+
+
+with open("combine.json", "r") as f:
+    data = json.load(f)
+f.close()
+print data
 """

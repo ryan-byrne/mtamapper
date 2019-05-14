@@ -1,6 +1,7 @@
 import sys, opc, json, math, collections
 
 dict = {}
+pixels = []
 colors = {
     "4":"#00933C",
     "5":"#00933C",
@@ -32,11 +33,13 @@ colors = {
     "H":"#0039A6"
 }
 exclude = ["S", "9"]
-combine = {}
+with open("resources/combine.json", "r") as f:
+    combine = json.load(f)
+f.close()
 # Creates an object to store train statuses
-with open("mta.json", "r") as f:
+with open("resources/mta.json", "r") as f:
     print "Reading mta.json into Python Object..."
-    mta = json.loads(f.read())
+    mta = json.load(f)
     print "Creating unordered dictionary..."
     for item in mta:
         s = item.keys()[0]
@@ -51,36 +54,10 @@ with open("mta.json", "r") as f:
         dict[s]['on'] = []
     print "Sorting dictionary..."
     status = collections.OrderedDict(sorted(dict.items()))
-    #status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
-    print "Checking for combinations..."
-    for s1 in mta:
-        for i1 in s1:
-            d_min = 10
-            #print i1
-            x1 = float(s1[i1]["coor"][0])
-            y1 = float(s1[i1]["coor"][2])
-            for s2 in mta:
-                for i2 in s2:
-                    if i1 == i2:
-                        continue
-                    x2 = float(s2[i2]["coor"][0])
-                    y2 = float(s2[i2]["coor"][2])
-                    x_diff = x1-x2
-                    y_diff = y1-y2
-                    dist = math.sqrt(x_diff**2 + y_diff**2)
-                    if dist < 0.04:
-                        if i1 in combine.keys():
-                            if i2 in combine[i1]:
-                                continue
-                            else:
-                                combine[i1].append(i2)
-                        elif i2 in combine.keys():
-                            if i1 in combine[i2]:
-                                continue
-                            else:
-                                combine[i2].append(i1)
-                        else:
-                            combine[i1] = [i2]
+f.close()
+
+with open("resources/light_order.json", "r") as f:
+    light_order = json.load(f)
 f.close()
 
 def color_blend(color_array):
@@ -108,16 +85,11 @@ class Lights():
 
     @staticmethod
     def control():
-        count = 0
         for stop in status.keys():
-            #print stop, status[stop]['on']
-            """
-            for s1 in combine.keys():
-                for s2 in combine[s1]:
-                    if stop == s2:
-                        status[stop]['on']
-            """
             train_array = status[stop]['on']
+            for s1 in combine.keys():
+                if stop in combine[s1]:
+                    train_array = status[stop]['on'] + status[s1]['on']
             color_array = []
             for t in train_array:
                 c = colors[t]
@@ -128,17 +100,10 @@ class Lights():
             if len(color_array) == 0:
                 status[stop]['color'] = (0, 0, 0)
             elif len(color_array) == 1:
-                count += 1
                 status[stop]['color'] = hex_to_rgb(color_array[0])
             else:
-                count += 1
                 color = color_blend(color_array)
                 status[stop]['color'] = color
-        pixel_array = []
-        for stop in status:
-            pixel_array.append(status[stop]["color"])
-        #print "There are currently ", count, " lights on..."
-        return pixel_array
 
     @staticmethod
     def run(stops, old_stops, client):
@@ -162,7 +127,14 @@ class Lights():
                         status[s[1]]["on"].remove(s[0])
                 except KeyError:
                     continue
-        pixels = Lights.control()
+        Lights.control()
+        for light in light_order:
+            if light == "":
+                pixels.append((0,0,0))
+                print light, (0,0,0)
+            else:
+                pixels.append(status[light]["color"])
+                print light, status[light]["color"]
         fc = client.put_pixels(pixels, channel=0)
         if not fc:
             print "Cannot send pixels to FadeCandy Controller. Continuing..."
