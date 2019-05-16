@@ -1,4 +1,4 @@
-import time, opc, sys, csv, json, subprocess
+import time, opc, sys, csv, json, subprocess, os
 from generate_stops import Generate
 from lights import Lights
 from opc import struct
@@ -6,7 +6,7 @@ from opc import struct
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
     print "Starting the FadeCandy Server..."
-    subprocess.Popen(["sudo", "fcserver", "/usr/local/bin/fcserver.json"])
+    #os.system("sudo fcserver /usr/local/bin/fcserver.json")
     print "Connect to the LED FadeCandy client..."
     client = opc.Client('localhost:7890')
     old_stops = []
