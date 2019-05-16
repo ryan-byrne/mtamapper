@@ -1,6 +1,7 @@
 import time, opc, sys, csv, json, subprocess
 from generate_stops import Generate
 from lights import Lights
+from opc import struct
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
@@ -14,7 +15,10 @@ if __name__ == '__main__':
     while True:
         print "Retriving current stops..."
         current_stops = Generate.run()
-        Lights.run(current_stops, old_stops, client)
+        try:
+            Lights.run(current_stops, old_stops, client)
+        except struct.error:
+            print "Issue sending pixels to the board. Continuing..."
         old_stops = current_stops
         elapsed = time.time() - t
         print "Running for: " + str(round(elapsed/60,2)) + " minutes"

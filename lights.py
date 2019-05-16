@@ -131,10 +131,10 @@ class Lights():
         for light in light_order:
             if light == "":
                 pixels.append((0,0,0))
-                print light, (0,0,0)
+                #print light, (0,0,0)
             else:
                 pixels.append(status[light]["color"])
-                print light, status[light]["color"]
+                #print light, status[light]["color"]
         fc = client.put_pixels(pixels, channel=0)
         if not fc:
             print "Cannot send pixels to FadeCandy Controller. Continuing..."
