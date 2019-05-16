@@ -1,7 +1,6 @@
 import sys, opc, json, math, collections
 
 dict = {}
-pixels = []
 colors = {
     "4":"#00933C",
     "5":"#00933C",
@@ -107,6 +106,7 @@ class Lights():
 
     @staticmethod
     def run(stops, old_stops):
+        pixels = []
         for s in stops:
             if s not in old_stops:
                 #print "Turn on ", s[0], " at ", s[1]

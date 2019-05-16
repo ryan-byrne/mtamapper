@@ -19,7 +19,6 @@ if __name__ == '__main__':
             pixels = Lights.run(current_stops, old_stops)
         except struct.error:
             print "Issue sending pixels to the board. Continuing..."
-        print len(pixels)
         client.put_pixels(pixels, channel=0)
         old_stops = current_stops
         elapsed = time.time() - t
