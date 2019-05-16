@@ -16,9 +16,10 @@ if __name__ == '__main__':
         print "Retriving current stops..."
         current_stops = Generate.run()
         try:
-            Lights.run(current_stops, old_stops, client)
+            pixels = Lights.run(current_stops, old_stops)
         except struct.error:
             print "Issue sending pixels to the board. Continuing..."
+        client.put_pixels(pixels, channel=0)
         old_stops = current_stops
         elapsed = time.time() - t
         print "Running for: " + str(round(elapsed/60,2)) + " minutes"

@@ -106,7 +106,7 @@ class Lights():
                 status[stop]['color'] = color
 
     @staticmethod
-    def run(stops, old_stops, client):
+    def run(stops, old_stops):
         for s in stops:
             if s not in old_stops:
                 #print "Turn on ", s[0], " at ", s[1]
@@ -135,8 +135,4 @@ class Lights():
             else:
                 pixels.append(status[light]["color"])
                 #print light, status[light]["color"]
-        fc = client.put_pixels(pixels, channel=0)
-        if not fc:
-            print "Cannot send pixels to FadeCandy Controller. Continuing..."
-        else:
-            print "Sending pixels to FadeCandy..."
+        return pixels
