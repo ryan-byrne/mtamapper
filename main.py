@@ -11,7 +11,7 @@ if __name__ == '__main__':
     old_stops = []
     print "Running Startup..."
     for i in range(numLEDs):
-		pixels = [ (0,0,0) ] * numLEDs
+		pixels = [ (0,0,0) ] * 443
 		pixels[i] = (255, 255, 255)
 		client.put_pixels(pixels)
 		time.sleep(0.01)
