@@ -10,7 +10,7 @@ if __name__ == '__main__':
     client = opc.Client('localhost:7890')
     old_stops = []
     print "Running Startup..."
-    for i in range(numLEDs):
+    for i in range(443):
 		pixels = [ (0,0,0) ] * 443
 		pixels[i] = (255, 255, 255)
 		client.put_pixels(pixels)
