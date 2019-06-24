@@ -37,11 +37,11 @@ with open("resources/combine.json", "r") as f:
 f.close()
 # Creates an object to store train statuses
 with open("resources/mta.json", "r") as f:
-    print "Reading mta.json into Python Object..."
+    print("Reading mta.json into Python Object...")
     mta = json.load(f)
-    print "Creating unordered dictionary..."
+    print("Creating unordered dictionary...")
     for item in mta:
-        s = item.keys()[0]
+        s = [*item][0]
         r = s[0]
         if r in exclude:
             continue
@@ -51,7 +51,7 @@ with open("resources/mta.json", "r") as f:
         dict[s]['color'] = (0, 0, 0)
         dict[s]['coor'] = item[s]["coor"]
         dict[s]['on'] = []
-    print "Sorting dictionary..."
+    print("Sorting dictionary...")
     status = collections.OrderedDict(sorted(dict.items()))
 f.close()
 

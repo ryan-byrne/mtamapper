@@ -1,7 +1,7 @@
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 import requests, csv, time, json
-from urllib2 import URLError
+from urllib.request import URLError
 
 stops = []
 
@@ -13,20 +13,20 @@ class Generate():
         id_array = ["1", "26", "16", "21", "2", "31", "36", "51"]
         key = "aec131a835263208ee94b402590bb930"
         exclude = ["9", "S", "FS", "", "GS"]
-        print "Updating train info..."
+        print("Updating train info...")
         for id in id_array:
             feed = gtfs_realtime_pb2.FeedMessage()
             #print "Retriving info from MTA datamine..."
             try:
                 response = requests.get('http://datamine.mta.info/mta_esi.php?key='+key+'&feed_id='+id, )
             except URLError:
-                print "Error reading data from MTA datamine. Continuing..."
+                print("Error reading data from MTA datamine. Continuing...")
             #print "Parsing response into Python Object"
             try:
                 r = response.content
                 feed.ParseFromString(r)
             except DecodeError:
-                print "Error reading group ", id," from Google. Continuing..."
+                print("Error reading group ", id," from Google. Continuing...")
                 continue
             #print "Generating list of current stops for array #", id
             for e in feed.entity:
@@ -46,6 +46,6 @@ class Generate():
         try:
             current_trains = Generate.update_train_info()
         except UnboundLocalError:
-            print "Recieved a corrupt message from the Data Feed. Retrying..."
+            print("Recieved a corrupt message from the Data Feed. Retrying...")
             return []
         return current_trains
