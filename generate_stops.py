@@ -1,7 +1,7 @@
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 import requests, csv, time, json
-from urllib.request import URLError
+from urllib2 import URLError
 
 stops = []
 

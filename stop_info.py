@@ -1,95 +1,31 @@
 import csv, json, math, collections
 
-exclude = ["S", "9"]
-status = {}
-combine = {}
-combine_list = []
-"""
-with open("mta.json", "r") as f:
-    mta = json.loads(f.read())
-    for s1 in mta:
-        for i1 in s1:
-            d_min = 10
-            #print i1
-            x1 = float(s1[i1]["coor"][0])
-            y1 = float(s1[i1]["coor"][2])
-            for s2 in mta:
-                for i2 in s2:
-                    if i1 == i2:
-                        continue
-                    x2 = float(s2[i2]["coor"][0])
-                    y2 = float(s2[i2]["coor"][2])
-                    x_diff = x1-x2
-                    y_diff = y1-y2
-                    dist = math.sqrt(x_diff**2 + y_diff**2)
-                    if dist < 0.04:
-                        if i1 in combine.keys():
-                            if i2 in combine[i1]:
-                                continue
-                            else:
-                                combine_list.append(i2)
-                                combine[i1].append(i2)
-                        elif i2 in combine.keys():
-                            if i1 in combine[i2]:
-                                continue
-                            else:
-                                combine_list.append(i1)
-                                combine[i2].append(i1)
-                        else:
-                            combine_list.append(i2)
-                            combine[i1] = [i2]
-    for item in mta:
-        s = item.keys()[0]
-        r = s[0]
-        if r in exclude:
-            continue
-        # If stop has combined coordinates
-        if s in combine_list:
-            # Search for it in each of the Dictionary entries
-            for key in combine.keys():
-                # If found in a dictionary
-                if s in combine[key]:
-                    # Use the coordinates of the dictionary entry
-                    coor = status[key]["coor"]
-        else:
-            coor = item[s]["coor"]
-        status[s] = {}
-        status[s]['color'] = (0, 0, 0)
-        status[s]['coor'] = coor
-        status[s]['on'] = []
-    status["R60"] = {'color': (0, 0, 0), "coor":[0,0], "on":[]}
-s = {}
-
-with open("google_transit/stops.txt", "r") as f:
-    stops = csv.DictReader(f)
-    for stop in stops:
-        s[stop["stop_id"]] = stop["stop_name"]
+with open("resources/light_order.json", "r") as f:
+    order = json.load(f)
 f.close()
 
-od = collections.OrderedDict(sorted(status.items()))
+coor = {}
 
-for stop in od:
+# {"point": [1.32, 0.00, 1.32]}
+
+s = {}
+
+with open("resources/mta.json", "r") as f:
+    stops = json.load(f)
+    for stop in stops:
+        s[stop.keys()[0]] = stop[stop.keys()[0]]
+f.close()
+
+order_coor = []
+
+# {"point": [1.32, 0.00, 1.32]}
+
+for stop in order:
     try:
-        print stop, s[stop]
+        order_coor.append({"point":s[stop]["coor"]})
     except KeyError:
         continue
 
-coor_array = []
-
-with open("combine.json", "w+") as f:
-    json.dump(combine, f)
-
-
-with open("resources/openpixelcontrol/layouts/mta.json", "w+") as f:
-    for stop in od:
-        coor = od[stop]["coor"]
-        coor_array.append({"point":coor})
-    json.dump(coor_array, f)
+with open("mta.json", "w+") as f:
+    json.dump(order_coor, f)
 f.close()
-
-
-with open("combine.json", "r") as f:
-    data = json.load(f)
-f.close()
-print data
-"""

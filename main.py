@@ -5,16 +5,18 @@ from opc import struct
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
-    os.system("sudo fcserver /usr/local/bin/fcserver.json")
+    #os.system("sudo fcserver /usr/local/bin/fcserver.json")
     print("Connect to the LED FadeCandy client...")
     client = opc.Client('localhost:7890')
     old_stops = []
     print("Running Startup...")
+    """
     for i in range(443):
         pixels = [ (0,0,0) ] * 443
         pixels[i] = (255, 255, 255)
         client.put_pixels(pixels)
         time.sleep(0.01)
+    """
     print("Beginning Timer...")
     t = time.time()
     while True:

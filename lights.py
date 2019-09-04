@@ -41,7 +41,7 @@ with open("resources/mta.json", "r") as f:
     mta = json.load(f)
     print("Creating unordered dictionary...")
     for item in mta:
-        s = [*item][0]
+        s = item.keys()[0]
         r = s[0]
         if r in exclude:
             continue
