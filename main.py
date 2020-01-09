@@ -28,6 +28,43 @@ class MTA():
                 # Parse Entire Feed
                 for e in feed.entity:
                     # Record Route of Trip
+                    route = e.vehicle.trip.route_id
+                    # Exclude particular routes and Trains that are not stopped
+                    if route in self.exclude:
+                        continue
+                    # Record Stop (without direction)
+                    stop = e.vehicle.stop_id[:3]
+                    if stop not in self.dict.keys():
+                        # Check if stop is already in dict
+                        self.dict[stop] = [route]
+                    elif route in self.dict[stop]:
+                        # Check if route is already in dict's list
+                        continue
+                    else:
+                        self.dict[stop].append(route)
+
+
+
+        except KeyboardInterrupt:
+            print("Exiting...")
+            sys.exit()
+        except ConnectionError:
+            print("Error connecting to the {0} Datamine...".format(id))
+        except DecodeError:
+            print("Error decoding from {0} Datamine...".format(id))
+
+
+    def fetch2(self, session, id):
+        #print("Updating train info for ID: {0}...".format(id))
+        feed = gtfs_realtime_pb2.FeedMessage()
+        #print "Retriving info from MTA datamine..."
+        try:
+            with session.get(self.url + id, timeout=5) as response:
+                r = response.content
+                feed.ParseFromString(r)
+                # Parse Entire Feed
+                for e in feed.entity:
+                    # Record Route of Trip
                     route = e.trip_update.trip.route_id
                     # Exclude particular routes
                     if route in self.exclude:
@@ -35,6 +72,8 @@ class MTA():
                     else:
                         # Parse Stops in Entire Trip
                         for s in e.trip_update.stop_time_update:
+                            print("*"*20)
+                            print(s)
                             # Record Stop ID
                             s = s.stop_id[:-1]
                             # Check if the stop is combined to another
@@ -94,6 +133,7 @@ class Lights():
             "B":"#FF6319",
             "D":"#FF6319",
             "F":"#FF6319",
+            "FX":"#FF6319",
             "M":"#FF6319",
             "N":"#FCCC0A",
             "Q":"#FCCC0A",
@@ -159,8 +199,6 @@ def startup(test):
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
-
-    #client = startup()
 
     mta = MTA()
     lights = Lights()
