@@ -11,7 +11,10 @@ class MTA():
         self.trains = {}
         self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
         self.key = os.getenv("GMAPS")
-        with open("resources/combine.json", "r") as f:
+        path = "resources/combine.json"
+        if not os.path.exists(path):
+            path = "/home/pi/mta-map/"+path
+        with open(path, "r") as f:
             self.combine = json.load(f)
         f.close()
 
@@ -108,7 +111,10 @@ class Lights():
             "H":"#0039A6"
         }
         self.client = opc.Client('localhost:7890')
-        with open("resources/light_order.json", "r") as f:
+        path = "resources/light_order.json"
+        if not os.path.exists(path):
+            path = "/home/pi/mta-map/"+path
+        with open(path, "r") as f:
             self.light_order = json.load(f)
         f.close()
 
