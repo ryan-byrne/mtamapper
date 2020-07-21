@@ -1,4 +1,4 @@
-import time, sys, csv, json, subprocess, os, requests, opc, asyncio, collections
+import time, sys, csv, json, os, requests, opc, threading
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 from concurrent.futures import ThreadPoolExecutor
@@ -11,39 +11,46 @@ class MTA():
     def __init__(self):
         self.ids = ["1", "26", "16", "21", "2", "31", "36", "51"]
         self.exclude = ["9", "S", "FS", "", "GS", "H"]
-        self.url = 'http://datamine.mta.info/mta_esi.php?key=aec131a835263208ee94b402590bb930&feed_id='
-        self.dict = {}
+        self.trains = {}
+        self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
+        self.key = os.getenv("GMAPS")
         with open("resources/combine.json", "r") as f:
             self.combine = json.load(f)
         f.close()
 
-    def fetch(self, session, id):
-        #print("Updating train info for ID: {0}...".format(id))
-        feed = gtfs_realtime_pb2.FeedMessage()
-        #print "Retriving info from MTA datamine..."
+    def update(self):
+
+        self.trains = {}
+
+        for id in ['-ace','-bdfm','-g','-jz','-nqrw','-l','-7','']:
+            t = threading.Thread(target=self._get_trains, args=(id,))
+            t.start()
+            t.join()
+
+    def _get_trains(self, id):
         try:
-            with session.get(self.url + id, timeout=5) as response:
-                r = response.content
-                feed.ParseFromString(r)
-                # Parse Entire Feed
-                for e in feed.entity:
-                    # Record Route of Trip
-                    route = e.vehicle.trip.route_id
-                    # Exclude particular routes and Trains that are not stopped
-                    if route in self.exclude:
-                        continue
-                    # Record Stop (without direction)
-                    stop = e.vehicle.stop_id[:3]
-                    if stop not in self.dict.keys():
-                        # Check if stop is already in dict
-                        self.dict[stop] = [route]
-                    elif route in self.dict[stop]:
-                        # Check if route is already in dict's list
-                        continue
-                    else:
-                        self.dict[stop].append(route)
-
-
+            #print("Updating train info for ID: {0}...".format(id))
+            feed = gtfs_realtime_pb2.FeedMessage()
+            #print "Retriving info from MTA datamine..."
+            response = requests.get(self.url+id, headers={"x-api-key":self.key})
+            feed.ParseFromString(response.content)
+            # Parse Entire Feed
+            for e in feed.entity:
+                # Record Stop (without direction)
+                stop = e.vehicle.stop_id[:3]
+                # Record Route of Trip
+                route = e.vehicle.trip.route_id
+                # Exclude particular routes and Trains that are not stopped
+                if route in self.exclude:
+                    continue
+                if stop not in self.trains.keys():
+                    # Check if stop is already in dict
+                    self.trains[stop] = [route]
+                elif route in self.trains[stop]:
+                    # Check if route is already in dict's list
+                    continue
+                else:
+                    self.trains[stop].append(route)
 
         except KeyboardInterrupt:
             print("Exiting...")
@@ -53,65 +60,6 @@ class MTA():
         except DecodeError:
             print("Error decoding from {0} Datamine...".format(id))
 
-
-    def fetch2(self, session, id):
-        #print("Updating train info for ID: {0}...".format(id))
-        feed = gtfs_realtime_pb2.FeedMessage()
-        #print "Retriving info from MTA datamine..."
-        try:
-            with session.get(self.url + id, timeout=5) as response:
-                r = response.content
-                feed.ParseFromString(r)
-                # Parse Entire Feed
-                for e in feed.entity:
-                    # Record Route of Trip
-                    route = e.trip_update.trip.route_id
-                    # Exclude particular routes
-                    if route in self.exclude:
-                        continue
-                    else:
-                        # Parse Stops in Entire Trip
-                        for s in e.trip_update.stop_time_update:
-                            print("*"*20)
-                            print(s)
-                            # Record Stop ID
-                            s = s.stop_id[:-1]
-                            # Check if the stop is combined to another
-                            if s in self.combine.keys():
-                                stop = self.combine[s]
-                            else:
-                                stop = s
-                            if stop not in self.dict.keys():
-                                # Check if stop is already in dict
-                                self.dict[stop] = [route]
-                            elif route in self.dict[stop]:
-                                # Check if route is already in dict's list
-                                continue
-                            else:
-                                self.dict[stop].append(route)
-                            break
-        except KeyboardInterrupt:
-            print("Exiting...")
-            sys.exit()
-        except ConnectionError:
-            print("Error connecting to the {0} Datamine...".format(id))
-        except DecodeError:
-            print("Error decoding from {0} Datamine...".format(id))
-
-    async def get_data_asynchronous(self):
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            with requests.Session() as session:
-                loop = asyncio.get_event_loop()
-                tasks = [
-                    loop.run_in_executor(
-                        executor,
-                        self.fetch,
-                        *(session, id)
-                    )
-                    for id in self.ids
-                ]
-                for response in await asyncio.gather(*tasks):
-                    pass
 
 class Lights():
 
@@ -147,7 +95,6 @@ class Lights():
             "S":"#0039A6",
             "H":"#0039A6"
         }
-        self.dict = {}
         self.client = opc.Client('localhost:7890')
         with open("resources/light_order.json", "r") as f:
             self.light_order = json.load(f)
@@ -183,7 +130,7 @@ class Lights():
          hlen = len(hex)
          return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
 
-def startup(test):
+def startup():
     print("Starting FadeCandy Server...")
     #os.system("sudo fcserver /usr/local/bin/fcserver.json")
     print("Connecting to the LED FadeCandy client...")
@@ -203,15 +150,12 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
+    #startup()
+
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
         # Create empty dictionary to be populated
-        mta.dict = {}
-        loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(mta.get_data_asynchronous())
-        loop.run_until_complete(future)
-        pixels = lights.update_pixels(mta.dict)
-        lights.client.put_pixels(pixels, channel=0)
-
-        #print("Trains Updated in {0} sec".format(round((time.time()-t1),2)))
-        #print("Elapsed Time: {0} sec\n".format(round((time.time()-t0),2)))
+        trains = mta.update()
+        pixels = lights.update_pixels(mta.trains)
+        lights.client.put_pixels(pixels, channel=1)
+        time.sleep(0.5)
