@@ -54,6 +54,8 @@ class MTA():
                         stop = "L{0}".format(i)
                 else:
                     stop = e.vehicle.stop_id[:3]
+                if stop in self.combine.keys():
+                    stop = self.combine[stop]
                 if stop not in self.trains.keys():
                     # Check if stop is already in dict
                     self.trains[stop] = [route]
@@ -162,11 +164,11 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
-    #startup()
+    startup()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
         # Create empty dictionary to be populated
         trains = mta.update()
         pixels = lights.update_pixels(trains)
-        lights.client.put_pixels(pixels, channel=1)
+        lights.client.put_pixels(pixels)
