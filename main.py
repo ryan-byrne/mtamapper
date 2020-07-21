@@ -4,12 +4,9 @@ from google.protobuf.message import DecodeError
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import ConnectionError
 
-exclude = ["S", "9"]
-
 class MTA():
 
     def __init__(self):
-        self.ids = ["1", "26", "16", "21", "2", "31", "36", "51"]
         self.exclude = ["9", "S", "FS", "", "GS", "H"]
         self.trains = {}
         self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
@@ -22,12 +19,20 @@ class MTA():
 
         self.trains = {}
 
+        threads = []
+
         for id in ['-ace','-bdfm','-g','-jz','-nqrw','-l','-7','']:
-            t = threading.Thread(target=self._get_trains, args=(id,))
+            threads.append(threading.Thread(target=self._update_trains, args=(id,)))
+
+        for t in threads:
             t.start()
+
+        for t in threads:
             t.join()
 
-    def _get_trains(self, id):
+        return self.trains
+
+    def _update_trains(self, id):
         try:
             #print("Updating train info for ID: {0}...".format(id))
             feed = gtfs_realtime_pb2.FeedMessage()
@@ -36,13 +41,19 @@ class MTA():
             feed.ParseFromString(response.content)
             # Parse Entire Feed
             for e in feed.entity:
-                # Record Stop (without direction)
-                stop = e.vehicle.stop_id[:3]
                 # Record Route of Trip
                 route = e.vehicle.trip.route_id
-                # Exclude particular routes and Trains that are not stopped
+                # Exclude particular routes and record the Stop
                 if route in self.exclude:
                     continue
+                elif route == "L":
+                    i = int(e.vehicle.current_stop_sequence)
+                    if i < 10:
+                        stop = "L0{0}".format(i)
+                    else:
+                        stop = "L{0}".format(i)
+                else:
+                    stop = e.vehicle.stop_id[:3]
                 if stop not in self.trains.keys():
                     # Check if stop is already in dict
                     self.trains[stop] = [route]
@@ -59,7 +70,6 @@ class MTA():
             print("Error connecting to the {0} Datamine...".format(id))
         except DecodeError:
             print("Error decoding from {0} Datamine...".format(id))
-
 
 class Lights():
 
@@ -100,14 +110,16 @@ class Lights():
             self.light_order = json.load(f)
         f.close()
 
-    def update_pixels(self, dict):
+    def update_pixels(self, trains):
         pixels = []
         for stop in self.light_order:
-            if stop not in dict.keys():
+            if stop == "":
+                continue
+            elif stop not in trains.keys():
                 # No train at station
                 pixels.append((0,0,0))
             else:
-                pixels.append(self.color_blend(dict[stop]))
+                pixels.append(self.color_blend(trains[stop]))
         return pixels
 
     def color_blend(self, train_array):
@@ -156,6 +168,5 @@ if __name__ == '__main__':
     while True:
         # Create empty dictionary to be populated
         trains = mta.update()
-        pixels = lights.update_pixels(mta.trains)
+        pixels = lights.update_pixels(trains)
         lights.client.put_pixels(pixels, channel=1)
-        time.sleep(0.5)
