@@ -10,7 +10,7 @@ class MTA():
         self.exclude = ["9", "S", "FS", "", "GS", "H"]
         self.trains = {}
         self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
-        self.key = os.getenv("GMAPS")
+        self.key = "Qpr36as5me5xJPegsHGbY7h9qUFumIjd5wGH0zJo"
         path = "resources/combine.json"
         if not os.path.exists(path):
             path = "/home/pi/mta-map/"+path
@@ -71,10 +71,6 @@ class MTA():
         except KeyboardInterrupt:
             print("Exiting...")
             sys.exit()
-        except ConnectionError:
-            print("Error connecting to the {0} Datamine...".format(id))
-        except DecodeError:
-            print("Error decoding from {0} Datamine...".format(id))
 
 class Lights():
 
@@ -181,7 +177,7 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
-    startup()
+    #startup()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
