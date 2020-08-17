@@ -14,8 +14,8 @@ client = opc.Client('localhost:7890')
 
 while True:
     pixels = [ (0,0,250) ] * 443
-    client.put_pixels(pixels, channel=1)
+    client.put_pixels(pixels)
     time.sleep(1)
     pixels = [ (0,250,0) ] * 443
-    client.put_pixels(pixels, channel=1)
+    client.put_pixels(pixels)
     time.sleep(1)
