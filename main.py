@@ -1,4 +1,4 @@
-import time, sys, csv, json, os, requests, opc, threading
+import time, sys, csv, json, os, requests, opc, threading, subprocess
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 from concurrent.futures import ThreadPoolExecutor
@@ -166,6 +166,17 @@ def startup():
 
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
+    # Start the corresponding FC server
+    print(sys.platform)
+    if sys.platform == "darwin":
+        layout = "/Users/rbyrne/projects/mta-map/resources/layout.json"
+        server = "/Users/rbyrne/projects/mta-map/resources/opc/bin/gl_server"
+        subprocess.Popen([server,"-l",layout])
+    else:
+        fcserver = "/usr/local/bin/fcserver"
+        config = "/usr/local/bin/fcserver.json"
+        subprocess.Popen([fcserver,config])
+
 
     mta = MTA()
     lights = Lights()
