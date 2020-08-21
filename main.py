@@ -67,7 +67,10 @@ class MTA():
                     continue
                 else:
                     self.trains[stop].append(route)
-
+        except ConnectionError as e:
+            print("Unable to connect to the MTA Data Stream...")
+        except DecodeError:
+            print("Unable to decode the message from "+id)
         except KeyboardInterrupt:
             print("Exiting...")
             sys.exit()
