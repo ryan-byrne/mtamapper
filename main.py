@@ -130,14 +130,13 @@ class Lights():
     def update_pixels(self, trains):
         pixels = []
         for stop in self.light_order:
-            if stop == "":
-                continue
-            elif stop not in trains.keys():
+            try:
+                color = self.color_blend(trains[stop])
+            except KeyError:
+                color = (0,0,0)
                 # No train at station
-                pixels.append((0,0,0))
-            else:
-                pixels.append(self.color_blend(trains[stop]))
-        return pixels
+            pixels.append(color)
+        self.client.put_pixels(pixels)
 
     def color_blend(self, train_array):
         color_array = [self.hex_to_rgb(self.colors[t]) for t in train_array]
@@ -176,11 +175,10 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
-    light.startup()
+    lights.startup()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
         # Create empty dictionary to be populated
         trains = mta.update()
         pixels = lights.update_pixels(trains)
-        lights.client.put_pixels(pixels)
