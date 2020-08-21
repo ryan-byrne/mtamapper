@@ -180,7 +180,7 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
-    #startup()
+    startup()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
@@ -188,3 +188,4 @@ if __name__ == '__main__':
         trains = mta.update()
         pixels = lights.update_pixels(trains)
         lights.client.put_pixels(pixels)
+        time.sleep(1)
