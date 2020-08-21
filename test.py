@@ -1,4 +1,5 @@
-import opc, sys, subprocess,time
+import opc, sys, subprocess, time, json
+import pandas as pd
 
 if sys.platform == "darwin":
     layout = "/Users/rbyrne/projects/mta-map/resources/layout.json"
@@ -12,10 +13,14 @@ else:
 subprocess.Popen(command)
 client = opc.Client('localhost:7890')
 
-while True:
-    pixels = [ (0,0,250) ] * 443
+with open("resources/light_order.json") as f:
+    light_order = json.load(f)
+f.close()
+
+df = pd.read_csv("google_transit/stops.txt")
+for i, light in enumerate(light_order):
+    pixels = [ (0,0,0) ] * 443
+    pixels[i] = (255, 255, 255)
     client.put_pixels(pixels)
-    time.sleep(1)
-    pixels = [ (0,250,0) ] * 443
-    client.put_pixels(pixels)
+    print(light, df.loc[df['stop_id'] == light]["stop_name"].values)
     time.sleep(1)

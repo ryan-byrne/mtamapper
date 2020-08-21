@@ -117,6 +117,16 @@ class Lights():
             self.light_order = json.load(f)
         f.close()
 
+    def startup(self):
+
+        print("Running Startup...")
+
+        for i in range(443):
+            pixels = [ (0,0,0) ] * 443
+            pixels[i] = (255, 255, 255)
+            self.client.put_pixels(pixels)
+            time.sleep(0.01)
+
     def update_pixels(self, trains):
         pixels = []
         for stop in self.light_order:
@@ -149,20 +159,6 @@ class Lights():
          hlen = len(hex)
          return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
 
-def startup():
-    print("Starting FadeCandy Server...")
-    #os.system("sudo fcserver /usr/local/bin/fcserver.json")
-    print("Connecting to the LED FadeCandy client...")
-    client = opc.Client('localhost:7890')
-    print("Running Startup...")
-
-    for i in range(443):
-        pixels = [ (0,0,0) ] * 443
-        pixels[i] = (255, 255, 255)
-        client.put_pixels(pixels)
-        time.sleep(0.01)
-    return client
-
 # Takes stop IDs from a file and creates a Parsable Python Dictionary
 if __name__ == '__main__':
     # Start the corresponding FC server
@@ -180,7 +176,7 @@ if __name__ == '__main__':
     mta = MTA()
     lights = Lights()
 
-    startup()
+    light.startup()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
     while True:
@@ -188,4 +184,3 @@ if __name__ == '__main__':
         trains = mta.update()
         pixels = lights.update_pixels(trains)
         lights.client.put_pixels(pixels)
-        time.sleep(1)
