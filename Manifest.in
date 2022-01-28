@@ -1,2 +1,2 @@
-recursive-include mtamapper/lib *
+recursive-include lib *.json
 recursive-include mtamapper/bin *

@@ -7,28 +7,46 @@ def _get_args():
     parser = argparse.ArgumentParser(description="A Python Package for controlling an LED map of the MTA Subway system")
     parser.add_argument('-v', dest="verbose", action="store_true",help="Run in Verbose Mode")
     parser.add_argument('-s', dest="simulation", action="store_true",help="Run in Simulation Mode")
-    parser.add_argument('-i', dest="IP_ADDR", nargs="?", default='localhost', const="localhost", help="IP Address where the OPC Server will run")
-    parser.add_argument('-p', dest="PORT", nargs="?", default='localhost', const="7890", help="Port where the OPC Server will run")
+    parser.add_argument('-i', dest="IP_ADDR", nargs="?", default='localhost', const="localhost", help="IP Address for OPC Server (Defaults to localhost)")
+    parser.add_argument('-p', dest="PORT", nargs="?", type=int, default=7890, const=7890, help="Port for the OPC Server (defaults to )")
+    parser.add_argument('--run-startup', dest="startup", action="store_true", help="Run a startup script that illuminates each light one by one")
     return parser.parse_args()
+
+def _start_gl_server():
+
+    if sys.platform in ['win32', 'linux']:
+        raise OSError('gl_server can only run on MacOSX')
+
+    resp = subprocess.Popen(
+        [f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
+    output, error = resp.communicate()
+
+    print('error',error)
+
+def _start_fc_server():
+
+    if sys.platform == 'linux':
+        command = [f"{PATH}/bin/fcserver-rpi",f"{PATH}/lib/fcserver.json"]
+    elif sys.platform == 'darwin':
+        command = [f".{PATH}/bin/fcserver-macos",f"{PATH}/lib/fcserver.json"]
+    else:
+        command = [f".{PATH}/bin/fcserver.exe",f"{PATH}/lib/fcserver.json"]
+
+    resp = subprocess.Popen(command, shell=True)
+
+    output, error = resp.communicate()
+
+    print('output',output)
 
 def main():
 
     args = _get_args()
 
-    print(f".{PATH}/bin/fcserver-osx")
+    _ = _start_gl_server() if args.simulation else _start_fc_server()
 
-    if args.simulation:
-        command = [f"{PATH}/lib/gl_server","-l",f"{PATH}/lib/layout.json"]
-    elif sys.platform == 'linux':
-        command = [f".{PATH}/bin/fcserver-rpi",f"{PATH}/lib/fcserver.json"]
-    elif sys.platform == 'darwin':
-        command = [f".{PATH}/bin/fcserver-osx"]
-    else:
-        raise OSError("Windows is not supported")
-
-    subprocess.Popen(command, shell=True)
-
-    client = opc.Client('localhost:7890', verbose=args.verbose)
+    client = opc.Client(f'{args.IP_ADDR}:{args.PORT}', verbose=args.verbose)
 
     mta = MTA()
     lights = Lights()
