@@ -1,6 +1,6 @@
 # MTAMapper
 
-## Install
+## Installation
 
 ### Using PIP
 ```console
@@ -18,3 +18,16 @@ cd mta-map && python setup.py install
 ```
 
 ## Usage
+
+### Run Locally
+
+Open a GL_Server with the MTA Layout
+```console
+mta-test
+```
+### LED Control
+
+Control external LED strips:
+```console
+mta-map
+```
