@@ -1,1 +1,2 @@
 recursive-include mtamapper/lib *
+recursive-include mtamapper/bin *

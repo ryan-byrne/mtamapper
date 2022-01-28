@@ -8,8 +8,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts':[
-            'mta-test=mtamapper.bin:test',
-            'mta-map=mtamapper.bin:main'
+            'mta-map=mtamapper.script:main',
         ]
     },
     install_requires = [
