@@ -51,7 +51,7 @@ def main():
     mta = MTA()
     lights = Lights()
 
-    lights.startup()
+    _ = lights.startup() if args.startup else None
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
 
