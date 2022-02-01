@@ -23,7 +23,7 @@ def _start_gl_server():
 def _start_fc_server():
 
     if sys.platform == 'linux':
-        command = [f"{PATH}/bin/fcserver-rpi",f"{PATH}/lib/fcserver.json"]
+        command = ["sudo",f"{PATH}/bin/fcserver",f"{PATH}/lib/fcserver.json"]
     elif sys.platform == 'darwin':
         command = [f".{PATH}/bin/fcserver-macos",f"{PATH}/lib/fcserver.json"]
     else:
