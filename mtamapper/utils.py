@@ -112,60 +112,86 @@ EXCLUDE = ["9", "S", "FS", "", "GS", "H"]
 APP_TEMPLATE = """
 
 <html>
-  <h1>MTA Map</h1>
-  <script>
+  <head>
+    <style>
+    button {
+      cursor: pointer;
+      border: none;
+      color: white;
+      padding: 30px 50px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 30px;
+    }
+    #startButton {
+      background-color:#4CAF50;
+    }
+    #stopButton {
+      background-color:#f44336;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    </style>
+    <script>
 
-  var startButton;
-  var stopButton;
-  var message;
-  var active;
+    var startButton;
+    var stopButton;
+    var message;
+    var active;
 
-  window.onload = async () => {
-    startButton = document.getElementById('startButton');
-    stopButton = document.getElementById('stopButton');
-    message = document.getElementById('statusMessage');
-    var resp = await fetch('/status');
-    var data = await resp.json()
-    active = data.active;
-    startButton.disabled = active;
-    stopButton.disabled = !active;
-    var time = new Date();
-    message.innerHTML = `${time.toString()}: Map is ${active?'On':'Off'}`;
-  }
-  
-  function start(){
-    fetch('/start', {method:"POST"})
-      .then(resp=>{
-        startButton.disabled = true;
-        stopButton.disabled = false;
-        var datetime = new Date();
-        message.innerHTML = `${datetime.toString()}: <b>Successfully Started</b>`
-      })
-      .catch(err=>{
-        console.error(err);
-        message.innerHTML = "ERROR";
-      })
-  }
+    window.onload = async () => {
+      startButton = document.getElementById('startButton');
+      stopButton = document.getElementById('stopButton');
+      message = document.getElementById('statusMessage');
+      var resp = await fetch('/status');
+      var data = await resp.json()
+      active = data.active;
+      startButton.disabled = active;
+      stopButton.disabled = !active;
+      var time = new Date();
+      message.innerHTML = `${time.toString()}: Map is ${active?'On':'Off'}`;
+    }
+    
+    function start(){
+      fetch('/start', {method:"POST"})
+        .then(resp=>{
+          startButton.disabled = true;
+          stopButton.disabled = false;
+          var datetime = new Date();
+          message.innerHTML = `${datetime.toString()}: <b>Successfully Started</b>`
+        })
+        .catch(err=>{
+          console.error(err);
+          message.innerHTML = "ERROR";
+        })
+    }
 
-  function stop(){
-    fetch('/stop', {method:"POST"})
-      .then(resp=>{
-        startButton.disabled = false;
-        stopButton.disabled = true;
-        var datetime = new Date();
-        message.innerHTML = `${datetime.toString()}: <b>Successfully Stopped</b>`
-      })
-      .catch(err=>{
-        console.error(err);
-        message.innerHTML = "ERROR";
-      })
-  }
-  
-  </script>
-  <button onclick="start()" id="startButton">Start</button>
-  <button onclick="stop()" id="stopButton">Stop</button>
+    function stop(){
+      fetch('/stop', {method:"POST"})
+        .then(resp=>{
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          var datetime = new Date();
+          message.innerHTML = `${datetime.toString()}: <b>Successfully Stopped</b>`
+        })
+        .catch(err=>{
+          console.error(err);
+          message.innerHTML = "ERROR";
+        })
+    }
+    
+    </script>
+  </head>
+  <body>
+    <h1>MTA Map</h1>
+    <button onclick="start()" id="startButton">Start</button>
+    <button onclick="stop()" id="stopButton">Stop</button>
 
-  <p id="statusMessage">Hello</p>
+    <p id="statusMessage">Hello</p>
+  </body>
 </html>
 
 """
