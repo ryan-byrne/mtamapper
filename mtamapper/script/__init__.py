@@ -15,6 +15,10 @@ def start():
 def stop():
     return "Success!", 200
 
+@app.route('/', methods=['GET'])
+def index():
+    return "Hello world"
+
 def _get_args():
     parser = argparse.ArgumentParser(description="A Python Package for controlling an LED map of the MTA Subway system")
     parser.add_argument('-v', dest="verbose", action="store_true",help="Run in Verbose Mode")
@@ -70,7 +74,6 @@ def main():
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
 
     while True:
-        
         # Update the current status of trains
         trains = mta.update()
         # Set the color of their respective LEDs
