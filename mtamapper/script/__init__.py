@@ -25,7 +25,8 @@ def _start_gl_server():
 def _start_fc_server():
 
     print("Starting the FadeCandy Server...")
-    
+    print(f"Using Configuration at: {PATH}/lib/fcserver.json")
+
     if sys.platform in ['darwin', 'linux']:
         subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
     else:
