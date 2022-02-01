@@ -15,36 +15,24 @@ def _get_args():
 
 def _start_gl_server():
 
+    print("Starting Simulation Server")
+
     if sys.platform in ['win32', 'linux']:
         raise OSError('gl_server can only run on MacOSX')
 
     subprocess.Popen([f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"], shell=True)
-
-def _start_fc_server():
-
-    if sys.platform == 'linux':
-        command = ["sudo",f"{PATH}/bin/fcserver",f"{PATH}/lib/fcserver.json"]
-    elif sys.platform == 'darwin':
-        command = [f".{PATH}/bin/fcserver-macos",f"{PATH}/lib/fcserver.json"]
-    else:
-        print("Running on Windows...")
-        command = [f".{PATH}/bin/fcserver.exe",f"{PATH}/lib/fcserver.json"]
-
-    subprocess.Popen(command, shell=True)
 
 
 def main():
 
     args = _get_args()
 
-    print('Starting the listening server...')
-    _ = _start_gl_server() if args.simulation else _start_fc_server()
+    _ = _start_gl_server() if args.simulation else None
     
     print('Connecting to OPC Client...')
     client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
     if not client.can_connect():
         raise ConnectionError(f"OPC client was unable to connect to a server at {args.IP_ADDR}:{args.PORT}...")
-
     print('Starting the MTA Data Feed...')
     mta = MTA()
     print('Initializing Light Control...')
