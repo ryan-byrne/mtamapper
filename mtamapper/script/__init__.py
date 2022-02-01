@@ -29,12 +29,14 @@ def main():
 
     _ = _start_gl_server() if args.simulation else None
     
-    print('Connecting to OPC Client...')
+    print(f'Connecting to OPC Client at {args.IP_ADDR}:{args.PORT}...')
     client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
     if not client.can_connect():
         raise ConnectionError(f"OPC client was unable to connect to a server at {args.IP_ADDR}:{args.PORT}...")
+    
     print('Starting the MTA Data Feed...')
     mta = MTA()
+    
     print('Initializing Light Control...')
     lights = Lights()
 
