@@ -1,5 +1,4 @@
-import argparse, sys, subprocess, os, time, threading
-from datetime import datetime
+import argparse, sys, subprocess, os, time, threading, json
 from flask import Flask, render_template_string
 from mtamapper import MTA, Lights, utils, opc
 
@@ -26,6 +25,10 @@ def start():
         return "Started", 200
     else:
         return "Lights are already on", 500
+
+@app.route('/status', methods=['GET'])
+def status():
+    return(json.dumps({"active":ACTIVE}))
 
 @app.route('/', methods=['GET'])
 def index():
@@ -101,7 +104,7 @@ def main():
             # Send LED colors to the FadeCandy Server
             client.put_pixels(pixels)
         else:
-            client.put_pixels([])
+            lights.clear_pixels()
             time.sleep(3)
 
 def test():

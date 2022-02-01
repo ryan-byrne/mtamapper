@@ -118,11 +118,19 @@ APP_TEMPLATE = """
   var startButton;
   var stopButton;
   var message;
+  var active;
 
-  window.onload = () => {
+  window.onload = async () => {
     startButton = document.getElementById('startButton');
     stopButton = document.getElementById('stopButton');
     message = document.getElementById('statusMessage');
+    var resp = await fetch('/status');
+    var data = await resp.json()
+    active = data.active;
+    startButton.disabled = active;
+    stopButton.disabled = !active;
+    var time = new Date();
+    message.innerHTML = `${time.toString()}: Map is ${active?'On':'Off'}`;
   }
   
   function start(){
@@ -155,7 +163,7 @@ APP_TEMPLATE = """
   
   </script>
   <button onclick="start()" id="startButton">Start</button>
-  <button onclick="stop()" id="stopButton" disabled>Stop</button>
+  <button onclick="stop()" id="stopButton">Stop</button>
 
   <p id="statusMessage">Hello</p>
 </html>

@@ -135,6 +135,9 @@ class Lights():
                 # No train at station
             pixels.append(color)
         return pixels
+    
+    def clear_pixels(self):
+        return [(0,0,0) for l in self.light_order]
 
     def color_blend(self, train_array):
         color_array = [self.hex_to_rgb(self.colors[t]) for t in train_array]
