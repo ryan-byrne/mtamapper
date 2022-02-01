@@ -108,3 +108,56 @@ COMBINE = {
   }
 
 EXCLUDE = ["9", "S", "FS", "", "GS", "H"]
+
+APP_TEMPLATE = """
+
+<html>
+  <h1>MTA Map</h1>
+  <script>
+
+  var startButton;
+  var stopButton;
+  var message;
+
+  window.onload = () => {
+    startButton = document.getElementById('startButton');
+    stopButton = document.getElementById('stopButton');
+    message = document.getElementById('statusMessage');
+  }
+  
+  function start(){
+    fetch('/start', {method:"POST"})
+      .then(resp=>{
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        var datetime = new Date();
+        message.innerHTML = `${datetime.toString()}: <b>Successfully Started</b>`
+      })
+      .catch(err=>{
+        console.error(err);
+        message.innerHTML = "ERROR";
+      })
+  }
+
+  function stop(){
+    fetch('/stop', {method:"POST"})
+      .then(resp=>{
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        var datetime = new Date();
+        message.innerHTML = `${datetime.toString()}: <b>Successfully Stopped</b>`
+      })
+      .catch(err=>{
+        console.error(err);
+        message.innerHTML = "ERROR";
+      })
+  }
+  
+  </script>
+  <button onclick="start()" id="startButton">Start</button>
+  <button onclick="stop()" id="stopButton" disabled>Stop</button>
+
+  <p id="statusMessage">Hello</p>
+</html>
+
+"""

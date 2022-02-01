@@ -1,26 +1,35 @@
 import argparse, sys, subprocess, os, time, threading
 from datetime import datetime
-from flask import Flask
+from flask import Flask, render_template_string
 from mtamapper import MTA, Lights, utils, opc
 
 PATH = os.path.dirname(utils.__file__)
+TESTING = False
 ACTIVE = False
 
 app = Flask(__name__)
 
 @app.route('/stop', methods=['POST'])
 def stop():
-    ACTIVE = False
-    return "Stopped", 200
+    global ACTIVE
+    if ACTIVE:
+        ACTIVE = False
+        return "Stopped", 200
+    else:
+        return "Lights are already stopped", 500
 
 @app.route('/start', methods=['POST'])
 def start():
-    ACTIVE = True
-    return "Started", 200
+    global ACTIVE
+    if not ACTIVE:
+        ACTIVE = True
+        return "Started", 200
+    else:
+        return "Lights are already on", 500
 
 @app.route('/', methods=['GET'])
 def index():
-    return f"Hello world. it is {datetime.now()}"
+    return render_template_string(utils.APP_TEMPLATE)
 
 
 def _start_gl_server():
@@ -94,3 +103,6 @@ def main():
         else:
             client.put_pixels([])
             time.sleep(3)
+
+def test():
+    app.run(host='0.0.0.0', port=5000, debug=True)

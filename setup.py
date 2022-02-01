@@ -9,6 +9,7 @@ setup(
     entry_points={
         'console_scripts':[
             'mta-map=mtamapper.script:main',
+            'mta-test=mtamapper.script:test'
         ]
     },
     install_requires = [
