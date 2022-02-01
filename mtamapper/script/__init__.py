@@ -40,7 +40,7 @@ def _start_fc_server():
     print(f"Using Configuration at: {CONFIG_PATH}")
 
     if sys.platform == 'linux':
-        subprocess.Popen(["source",f"{PATH}/bin/fcserver",f"{PATH}/lib/fcserver.json"])
+        subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
     elif sys.platform == 'win32':
         subprocess.Popen([f"{PATH}\\bin\\fcserver.exe",f"{PATH}/lib/fcserver.json"])
     else:
