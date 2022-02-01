@@ -1,7 +1,7 @@
 import argparse, sys, subprocess, os, time, threading
 from datetime import datetime
 from flask import Flask
-from . import MTA, Lights, utils, opc, app
+from mtamapper import MTA, Lights, utils, opc, app
 
 PATH = os.path.dirname(utils.__file__)
 ACTIVE = False
