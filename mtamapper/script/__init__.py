@@ -22,12 +22,18 @@ def _start_gl_server():
 
     subprocess.Popen([f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"], shell=True)
 
+def _start_fc_server():
+
+    if sys.platform in ['darwin', 'linux']:
+        subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
+    else:
+        return
 
 def main():
 
     args = _get_args()
 
-    _ = _start_gl_server() if args.simulation else None
+    _ = _start_gl_server() if args.simulation else _start_fc_server()
     
     print(f'Connecting to OPC Client at {args.IP_ADDR}:{args.PORT}...')
     client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
