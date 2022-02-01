@@ -1,17 +1,19 @@
-import time, sys, csv, json, os, requests, threading, subprocess
-from . import opc, utils
+import time, sys, os, requests, threading, datetime
+from . import utils
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
-from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import ConnectionError
 
 class MTA():
 
     def __init__(self):
-        self.exclude = ["9", "S", "FS", "", "GS", "H"]
+        self.exclude = utils.EXCLUDE
         self.trains = {}
         self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
-        self.key = "Qpr36as5me5xJPegsHGbY7h9qUFumIjd5wGH0zJo"
+        if os.environ['MTA_API_KEY']:
+            self.key = os.environ['MTA_API_KEY']
+        else:
+            raise PermissionError("No permissions")
         self.combine = utils.COMBINE
 
     def update(self):
@@ -28,6 +30,8 @@ class MTA():
 
         for t in threads:
             t.join()
+        
+        #print(f"${datetime.datetime.now()} Trains Updated...")
 
         return self.trains
 
@@ -35,7 +39,7 @@ class MTA():
         try:
             #print("Updating train info for ID: {0}...".format(id))
             feed = gtfs_realtime_pb2.FeedMessage()
-            #print "Retriving info from MTA datamine..."
+            #print("Retriving info from MTA datamine...")
             response = requests.get(self.url+id, headers={"x-api-key":self.key})
             feed.ParseFromString(response.content)
             # Parse Entire Feed
@@ -73,7 +77,7 @@ class MTA():
 
 class Lights():
 
-    def __init__(self):
+    def __init__(self, ip="localhost", port="8000", verbose=False):
         self.colors = {
             "4":"#00933C",
             "5":"#00933C",
@@ -105,17 +109,17 @@ class Lights():
             "S":"#0039A6",
             "H":"#0039A6"
         }
-        self.client = opc.Client('localhost:7890')
+
         self.light_order = utils.LIGHT_ORDER
 
-    def startup(self):
+    def startup(self, client):
 
         print("Running Startup...")
 
         for i in range(443):
             pixels = [ (0,0,0) ] * 443
             pixels[i] = (255, 255, 255)
-            self.client.put_pixels(pixels)
+            client.put_pixels(pixels)
             time.sleep(0.01)
 
     def update_pixels(self, trains):
@@ -127,7 +131,7 @@ class Lights():
                 color = (0,0,0)
                 # No train at station
             pixels.append(color)
-        self.client.put_pixels(pixels)
+        return pixels
 
     def color_blend(self, train_array):
         color_array = [self.hex_to_rgb(self.colors[t]) for t in train_array]

@@ -1,4 +1,5 @@
 import argparse, sys, subprocess, os, time
+from ipaddress import ip_address
 from mtamapper import MTA, Lights, utils, opc
 
 PATH = os.path.dirname(utils.__file__)
@@ -17,13 +18,7 @@ def _start_gl_server():
     if sys.platform in ['win32', 'linux']:
         raise OSError('gl_server can only run on MacOSX')
 
-    resp = subprocess.Popen(
-        [f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-    )
-    output, error = resp.communicate()
-
-    print('error',error)
+    subprocess.Popen([f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"], shell=True)
 
 def _start_fc_server():
 
@@ -32,26 +27,30 @@ def _start_fc_server():
     elif sys.platform == 'darwin':
         command = [f".{PATH}/bin/fcserver-macos",f"{PATH}/lib/fcserver.json"]
     else:
+        print("Running on Windows...")
         command = [f".{PATH}/bin/fcserver.exe",f"{PATH}/lib/fcserver.json"]
 
-    resp = subprocess.Popen(command, shell=True)
+    subprocess.Popen(command, shell=True)
 
-    output, error = resp.communicate()
-
-    print('output',output)
 
 def main():
 
     args = _get_args()
 
+    print('Starting the listening server...')
     _ = _start_gl_server() if args.simulation else _start_fc_server()
+    
+    print('Connecting to OPC Client...')
+    client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
+    if not client.can_connect():
+        raise ConnectionError(f"OPC client was unable to connect to a server at {args.IP_ADDR}:{args.PORT}...")
 
-    client = opc.Client(f'{args.IP_ADDR}:{args.PORT}', verbose=args.verbose)
-
+    print('Starting the MTA Data Feed...')
     mta = MTA()
+    print('Initializing Light Control...')
     lights = Lights()
 
-    _ = lights.startup() if args.startup else None
+    _ = lights.startup(client) if args.startup else None
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
 
@@ -59,3 +58,4 @@ def main():
         # Create empty dictionary to be populated
         trains = mta.update()
         pixels = lights.update_pixels(trains)
+        client.put_pixels(pixels)

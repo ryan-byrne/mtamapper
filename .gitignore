@@ -1,7 +1,8 @@
 *.DS_Store
 *.pyc
 mtamapper.egg-info
-/env
+/.venv
+/.vscode
 /build
 /dist
 /legacy

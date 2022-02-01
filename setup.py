@@ -16,7 +16,7 @@ setup(
         'gtfs-realtime-bindings'
     ],
     package_data={'mtamapper':['lib/*','bin/*']},
-    url='https://github.com/ryan-byrne/mta-map',
+    url='https://github.com/ryan-byrne/mtamapper',
     license='LICENSE.txt',
     description='A Python Package for controlling an LED map of the MTA Subway system',
     long_description=open('README.md').read()
