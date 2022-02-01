@@ -85,7 +85,7 @@ def main():
     lights = Lights()
 
     # Start server depending on "simulation" argument
-    _ = _start_gl_server() if args.simulation else _start_fc_server()
+    _ = _start_gl_server() if args.simulation else _
 
     # Run startup function if "--run-startup" argument
     _ = lights.startup(client) if args.startup else None
