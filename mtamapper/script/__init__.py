@@ -24,6 +24,8 @@ def _start_gl_server():
 
 def _start_fc_server():
 
+    print("Starting the FadeCandy Server...")
+    
     if sys.platform in ['darwin', 'linux']:
         subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
     else:
@@ -34,6 +36,7 @@ def main():
     args = _get_args()
 
     _ = _start_gl_server() if args.simulation else _start_fc_server()
+    time.sleep(3)
     
     print(f'Connecting to OPC Client at {args.IP_ADDR}:{args.PORT}...')
     client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
