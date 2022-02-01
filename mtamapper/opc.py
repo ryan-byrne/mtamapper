@@ -63,6 +63,9 @@ class Client(object):
         If verbose is True, the client will print debugging info to the console.
 
         """
+
+        print(f'Connecting to OPC Client at {server_ip_port}...')
+
         self.verbose = verbose
 
         self._long_connection = long_connection

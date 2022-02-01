@@ -1,5 +1,6 @@
 import time, sys, os, requests, threading, datetime
 from . import utils
+from flask import Flask
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 from requests.exceptions import ConnectionError
@@ -7,13 +8,18 @@ from requests.exceptions import ConnectionError
 class MTA():
 
     def __init__(self):
+        
+        print("Starting the MTA Data Feed...")
         self.exclude = utils.EXCLUDE
         self.trains = {}
         self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
-        if os.environ['MTA_API_KEY']:
+        
+        try:
             self.key = os.environ['MTA_API_KEY']
-        else:
-            raise PermissionError("No permissions")
+        except:
+            raise PermissionError("\n\nERROR: MTA Realtime Feed Key (MTA_API_KEY) not found \
+            \n\nGet one from: https://api.mta.info/ then add it as MTA_API_KEY in your environment\n")
+
         self.combine = utils.COMBINE
 
     def update(self):
@@ -109,7 +115,6 @@ class Lights():
             "S":"#0039A6",
             "H":"#0039A6"
         }
-
         self.light_order = utils.LIGHT_ORDER
 
     def startup(self, client):

@@ -1,8 +1,19 @@
-import argparse, sys, subprocess, os, time
-from ipaddress import ip_address
+import argparse, sys, subprocess, os, time, threading
+from flask import Flask
 from mtamapper import MTA, Lights, utils, opc
 
 PATH = os.path.dirname(utils.__file__)
+ACTIVE = False
+
+app = Flask(__name__)
+
+@app.route('/start', methods=['POST'])
+def start():
+    return "Success!", 200
+
+@app.route('/stop', methods=['POST'])
+def stop():
+    return "Success!", 200
 
 def _get_args():
     parser = argparse.ArgumentParser(description="A Python Package for controlling an LED map of the MTA Subway system")
@@ -25,37 +36,44 @@ def _start_gl_server():
 def _start_fc_server():
 
     print("Starting the FadeCandy Server...")
-    print(f"Using Configuration at: {PATH}/lib/fcserver.json")
+    CONFIG_PATH = os.path.normpath(f"{PATH}/lib/fcserver.json")
+    print(f"Using Configuration at: {CONFIG_PATH}")
 
-    if sys.platform in ['linux']:
-        subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
+    if sys.platform == 'linux':
+        subprocess.Popen(["source",f"{PATH}/bin/fcserver",f"{PATH}/lib/fcserver.json"])
+    elif sys.platform == 'win32':
+        subprocess.Popen([f"{PATH}\\bin\\fcserver.exe",f"{PATH}/lib/fcserver.json"])
     else:
-        return
+        subprocess.Popen(["source",f"{PATH}/bin/fcserver-osx",f"{PATH}/lib/fcserver.json"])
+
+def _start_flask_server():
+    print("Starting Flask Server...")
+    app.run(host='0.0.0.0', port=5000)
 
 def main():
 
     args = _get_args()
 
     _ = _start_gl_server() if args.simulation else _start_fc_server()
-    time.sleep(3)
+
+    mta = MTA()
+    lights = Lights()
     
-    print(f'Connecting to OPC Client at {args.IP_ADDR}:{args.PORT}...')
     client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
     if not client.can_connect():
         raise ConnectionError(f"OPC client was unable to connect to a server at {args.IP_ADDR}:{args.PORT}...")
-    
-    print('Starting the MTA Data Feed...')
-    mta = MTA()
-    
-    print('Initializing Light Control...')
-    lights = Lights()
 
     _ = lights.startup(client) if args.startup else None
+
+    threading.Thread(target=_start_flask_server).start()
 
     print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
 
     while True:
-        # Create empty dictionary to be populated
+        
+        # Update the current status of trains
         trains = mta.update()
+        # Set the color of their respective LEDs
         pixels = lights.update_pixels(trains)
+        # Send LED colors to the FadeCandy Server
         client.put_pixels(pixels)
