@@ -28,7 +28,7 @@ def _start_fc_server():
     print(f"Using Configuration at: {PATH}/lib/fcserver.json")
 
     if sys.platform in ['linux']:
-        subprocess.Popen(["sudo",f"{PATH}/bin/fcserver-rpi",f"{PATH}/lib/fcserver.json"])
+        subprocess.Popen(["sudo",f"{PATH}/bin/fcserver",f"{PATH}/lib/fcserver.json"])
     else:
         return
 
