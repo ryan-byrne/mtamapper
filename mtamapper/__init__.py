@@ -1,6 +1,5 @@
 import time, sys, os, requests, threading, datetime
 from . import utils
-from flask import Flask
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.message import DecodeError
 from requests.exceptions import ConnectionError
@@ -8,7 +7,7 @@ from requests.exceptions import ConnectionError
 class MTA():
 
     def __init__(self):
-        
+
         print("Starting the MTA Data Feed...")
         self.exclude = utils.EXCLUDE
         self.trains = {}
@@ -80,7 +79,6 @@ class MTA():
         except KeyboardInterrupt:
             print("Exiting...")
             sys.exit()
-
 class Lights():
 
     def __init__(self, ip="localhost", port="8000", verbose=False):
