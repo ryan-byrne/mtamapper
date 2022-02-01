@@ -104,7 +104,8 @@ def main():
             # Send LED colors to the FadeCandy Server
             client.put_pixels(pixels)
         else:
-            lights.clear_pixels()
+            no_pixels = lights.clear_pixels()
+            client.put_pixels(no_pixels)
             time.sleep(3)
 
 def test():
