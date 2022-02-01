@@ -2,19 +2,23 @@
 
 ## Installation
 
-### Using PIP
-```console
-pip install mtamapper
-```
-### From Source
+### MTA Mapper Python Package
 
 Clone the repository
 ```console
-git clone https://github.com/ryan-byrne/mta-map
+git clone https://github.com/ryan-byrne/mtamapper
 ```
 Then install using ```setup.py```
 ```console
-cd mta-map && python setup.py install
+cd mta-map && sudo python setup.py install
+```
+
+### Install FadeCandy Server
+```console
+git clone https://github.com/scanlime/fadecandy
+cd fadecandy/server
+make submodules && make
+sudo mv fcserver /bin
 ```
 
 ## Usage
