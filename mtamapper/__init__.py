@@ -1,16 +1,15 @@
 from flask import Flask, render_template_string
 import argparse, sys, subprocess, os, time, threading, json
-from .lights import Lights
-from .mta import MTA
-from .utils import APP_TEMPLATE, opc
+#from .lights import Lights, opc
+#from .mta import MTA
+from .utils import APP_TEMPLATE
 
-PATH = os.path.dirname(argparse.__file__)
-print(PATH)
-app = Flask(__name__)
-mta = MTA()
-lights = Lights()
-
+#PATH = os.path.dirname(argparse.__file__)
+#print(PATH)
+#mta = MTA()
+#lights = Lights()
 # API
+app = Flask(__name__)
 @app.route('/stop', methods=['POST'])
 def stop():
     if mta.active:

@@ -1,7 +1,7 @@
 import os, threading, requests, sys
-from .utils import EXCLUDE, COMBINE
+from ..utils import EXCLUDE, COMBINE
+from . import gtfs_realtime_pb2 as gtfs
 from google.protobuf.message import DecodeError
-from requests.exceptions import ConnectionError
 
 class MTA():
 
@@ -42,7 +42,7 @@ class MTA():
     def _update_trains(self, id):
         try:
             #print("Updating train info for ID: {0}...".format(id))
-            feed = gtfs_realtime_pb2.FeedMessage()
+            feed = gtfs.FeedMessage()
             #print("Retriving info from MTA datamine...")
             response = requests.get(self.url+id, headers={"x-api-key":self.key})
             feed.ParseFromString(response.content)

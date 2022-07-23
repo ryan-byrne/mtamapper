@@ -1,5 +1,5 @@
 import time
-from .utils import COLORS, LIGHT_ORDER
+from ..utils import COLORS, LIGHT_ORDER
 
 class Lights():
 
