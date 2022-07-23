@@ -8,13 +8,13 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts':[
-            'mta-map=mtamapper.script:main',
-            'mta-test=mtamapper.script:test'
+            'mta-map=mtamapper:main',
         ]
     },
     install_requires = [
         'requests',
-        'gtfs-realtime-bindings'
+        'gtfs-realtime-bindings',
+        'flask'
     ],
     package_data={'mtamapper':['lib/*','bin/*']},
     url='https://github.com/ryan-byrne/mtamapper',

@@ -1,160 +1,115 @@
-import time, sys, os, requests, threading, datetime
-from . import utils
-from google.transit import gtfs_realtime_pb2
-from google.protobuf.message import DecodeError
-from requests.exceptions import ConnectionError
+from flask import Flask, render_template_string
+import argparse, sys, subprocess, os, time, threading, json
+from .lights import Lights
+from .mta import MTA
+from .utils import APP_TEMPLATE, opc
 
-class MTA():
+PATH = os.path.dirname(argparse.__file__)
+print(PATH)
+app = Flask(__name__)
+mta = MTA()
+lights = Lights()
 
-    def __init__(self):
+# API
+@app.route('/stop', methods=['POST'])
+def stop():
+    if mta.active:
+        mta.active = False
+        return "Stopped", 200
+    else:
+        return "Lights are already stopped", 500
 
-        print("Starting the MTA Data Feed...")
-        self.exclude = utils.EXCLUDE
-        self.trains = {}
-        self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
-        
-        try:
-            self.key = os.environ['MTA_API_KEY']
-        except:
-            raise PermissionError("\n\nERROR: MTA Realtime Feed Key (MTA_API_KEY) not found \
-            \n\nGet one from: https://api.mta.info/ then add it as MTA_API_KEY in your environment\n")
+@app.route('/start', methods=['POST'])
+def start():
+    if mta.active:
+        mta.active = True
+        return "Started", 200
+    else:
+        return "Lights are already on", 500
 
-        self.combine = utils.COMBINE
+@app.route('/status', methods=['GET'])
+def status():
+    return(json.dumps({"active":mta.active}))
 
-    def update(self):
+@app.route('/', methods=['GET'])
+def index():
+    return render_template_string(APP_TEMPLATE)
 
-        self.trains = {}
+# SCRIPTS
 
-        threads = []
+# Get Command Line Arguments
+def _get_args():
+    parser = argparse.ArgumentParser(description="A Python Package for controlling an LED map of the MTA Subway system")
+    parser.add_argument('-v', dest="verbose", action="store_true",help="Run in Verbose Mode")
+    parser.add_argument('-s', dest="simulation", action="store_true",help="Run in Simulation Mode")
+    parser.add_argument('-i', dest="IP_ADDR", nargs="?", default='localhost', const="localhost", help="IP Address for OPC Server (Defaults to localhost)")
+    parser.add_argument('-p', dest="PORT", nargs="?", type=int, default=7890, const=7890, help="Port for the OPC Server (defaults to )")
+    parser.add_argument('--run-startup', dest="startup", action="store_true", help="Run a startup script that illuminates each light one by one")
+    return parser.parse_args()
 
-        for id in ['-ace','-bdfm','-g','-jz','-nqrw','-l','-7','']:
-            threads.append(threading.Thread(target=self._update_trains, args=(id,)))
+def _flask_server():
+    print("Starting Flask Server...")
+    app.run(host='0.0.0.0', port=5000)
 
-        for t in threads:
-            t.start()
+def _fc_server():
+    STATUS = "starting-fadecandy"
+    print("Starting the FadeCandy Server...")
+    CONFIG_PATH = os.path.normpath(f"{PATH}/lib/fcserver.json")
+    print(f"Using Configuration at: {CONFIG_PATH}")
 
-        for t in threads:
-            t.join()
-        
-        #print(f"${datetime.datetime.now()} Trains Updated...")
+    if sys.platform == 'linux':
+        subprocess.Popen(["sudo","fcserver",f"{PATH}/lib/fcserver.json"])
+    elif sys.platform == 'win32':
+        subprocess.Popen([f"{PATH}\\bin\\fcserver.exe",f"{PATH}/lib/fcserver.json"])
+    else:
+        subprocess.Popen(["source",f"{PATH}/bin/fcserver-osx",f"{PATH}/lib/fcserver.json"])
 
-        return self.trains
+def _gl_server():
 
-    def _update_trains(self, id):
-        try:
-            #print("Updating train info for ID: {0}...".format(id))
-            feed = gtfs_realtime_pb2.FeedMessage()
-            #print("Retriving info from MTA datamine...")
-            response = requests.get(self.url+id, headers={"x-api-key":self.key})
-            feed.ParseFromString(response.content)
-            # Parse Entire Feed
-            for e in feed.entity:
-                # Record Route of Trip
-                route = e.vehicle.trip.route_id
-                # Exclude particular routes and record the Stop
-                if route in self.exclude:
-                    continue
-                elif route == "L":
-                    i = int(e.vehicle.current_stop_sequence)
-                    if i < 10:
-                        stop = "L0{0}".format(i)
-                    else:
-                        stop = "L{0}".format(i)
-                else:
-                    stop = e.vehicle.stop_id[:3]
-                if stop in self.combine.keys():
-                    stop = self.combine[stop]
-                if stop not in self.trains.keys():
-                    # Check if stop is already in dict
-                    self.trains[stop] = [route]
-                elif route in self.trains[stop]:
-                    # Check if route is already in dict's list
-                    continue
-                else:
-                    self.trains[stop].append(route)
-        except ConnectionError as e:
-            print("Unable to connect to the MTA Data Stream...")
-        except DecodeError:
-            print("Unable to decode the message from "+id)
-        except KeyboardInterrupt:
-            print("Exiting...")
-            sys.exit()
-class Lights():
+    print("Starting Simulation Server")
 
-    def __init__(self, ip="localhost", port="8000", verbose=False):
-        self.colors = {
-            "4":"#00933C",
-            "5":"#00933C",
-            "6":"#00933C",
-            "6X":"#00933C",
-            "5X":"#00933C",
-            "1":"#EE352E",
-            "2":"#EE352E",
-            "3":"#EE352E",
-            "7":"#B933AD",
-            "7X":"#B933AD",
-            "A":"#0039A6",
-            "C":"#0039A6",
-            "E":"#0039A6",
-            "B":"#FF6319",
-            "D":"#FF6319",
-            "F":"#FF6319",
-            "FX":"#FF6319",
-            "M":"#FF6319",
-            "N":"#FCCC0A",
-            "Q":"#FCCC0A",
-            "R":"#FCCC0A",
-            "W":"#FCCC0A",
-            "G":"#6CBE45",
-            "L":"#A7A9AC",
-            "J":"#996633",
-            "Z":"#996633",
-            "9":"#808183",
-            "S":"#0039A6",
-            "H":"#0039A6"
-        }
-        self.light_order = utils.LIGHT_ORDER
+    if sys.platform in ['win32', 'linux']:
+        raise OSError('gl_server can only run on MacOSX')
 
-    def startup(self, client):
+    subprocess.Popen([f"{PATH}/bin/gl_server","-l",f"{PATH}/lib/layout.json"], shell=True)
 
-        print("Running Startup...")
-
-        for i in range(443):
-            pixels = [ (0,0,0) ] * 443
-            pixels[i] = (255, 255, 255)
-            client.put_pixels(pixels)
-            time.sleep(0.01)
-
-    def update_pixels(self, trains):
-        pixels = []
-        for stop in self.light_order:
-            try:
-                color = self.color_blend(trains[stop])
-            except KeyError:
-                color = (0,0,0)
-                # No train at station
-            pixels.append(color)
-        return pixels
+def main():
     
-    def clear_pixels(self):
-        return [(0,0,0) for l in self.light_order]
+    # Get Arguments
+    args = _get_args()
+    
+    # Start the fadecandy server
+    if args.simulation:
+        threading.Thread(target=_gl_server).start()
+    else:
+        threading.Thread(target=_fc_server).start()
+    
+    # Start the OpenPixelControl Client 
+    client = opc.Client(f"{args.IP_ADDR}:{args.PORT}", verbose=args.verbose)
+    if not client.can_connect():
+        raise ConnectionError(f"OPC client was unable to connect to a server...")
+    
 
-    def color_blend(self, train_array):
-        color_array = [self.hex_to_rgb(self.colors[t]) for t in train_array]
-        r = 0
-        g = 0
-        b = 0
-        for c in color_array:
-            r += int(c[0])
-            g += int(c[1])
-            b += int(c[2])
+    # Run startup function if "--run-startup" argument
+    _ = lights.startup(client) if args.startup else None
 
-        fr = min(r, 255)
-        fg = min(g, 255)
-        fb = min(b, 255)
-        return (fr, fg, fb)
+    # Start Flask Control Server
+    threading.Thread(target=_flask_server).start()
 
-    def hex_to_rgb(self, hex):
-         hex = hex.lstrip('#')
-         hlen = len(hex)
-         return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
+    print("\n*** Updating Trains. Press CTRL+C to Exit *** \n")
+
+    while True:
+        if mta.active:
+            # Update the current status of trains
+            trains = mta.update()
+            # Set the color of their respective LEDs
+            pixels = lights.update_pixels(trains)
+            # Send LED colors to the FadeCandy Server
+            client.put_pixels(pixels)
+        else:
+            no_pixels = lights.clear_pixels()
+            client.put_pixels(no_pixels)
+            time.sleep(3)
+
+if __name__ == '__main__':
+    main()

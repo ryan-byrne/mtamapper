@@ -3,6 +3,7 @@
 mtamapper.egg-info
 /.venv
 /.vscode
+/env
 /build
 /dist
 /legacy
