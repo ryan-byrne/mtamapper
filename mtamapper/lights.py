@@ -1,44 +1,55 @@
-#!/usr/bin/env python
+import time, socket, struct
+from .utils import COLORS, LIGHT_ORDER, SET_PIXEL_COLOURS
 
-"""Python Client library for Open Pixel Control
-http://github.com/zestyping/openpixelcontrol
+class Lights():
 
-Sends pixel values to an Open Pixel Control server to be displayed.
-http://openpixelcontrol.org/
+    def __init__(self):
+        self.colors = COLORS
+        self.light_order = LIGHT_ORDER
 
-Recommended use:
+    def startup(self, client):
 
-    import opc
+        print("Running Startup...")
 
-    # Create a client object
-    client = opc.Client('localhost:7890')
+        for i in range(443):
+            pixels = [ (0,0,0) ] * 443
+            pixels[i] = (255, 255, 255)
+            client.put_pixels(pixels)
+            time.sleep(0.01)
 
-    # Test if it can connect (optional)
-    if client.can_connect():
-        print('connected to %s' % ADDRESS)
-    else:
-        # We could exit here, but instead let's just print a warning
-        # and then keep trying to send pixels in case the server
-        # appears later
-        print('WARNING: could not connect to %s' % ADDRESS)
+    def update_pixels(self, trains):
+        pixels = []
+        for stop in self.light_order:
+            try:
+                color = self.color_blend(trains[stop])
+            except KeyError:
+                color = (0,0,0)
+                # No train at station
+            pixels.append(color)
+        return pixels
+    
+    def clear_pixels(self):
+        return [(0,0,0) for l in self.light_order]
 
-    # Send pixels forever at 30 frames per second
-    while True:
-        my_pixels = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
-        if client.put_pixels(my_pixels, channel=0):
-            print('...')
-        else:
-            print('not connected')
-        time.sleep(1/30.0)
+    def color_blend(self, train_array):
+        color_array = [self.hex_to_rgb(self.colors[t]) for t in train_array]
+        r = 0
+        g = 0
+        b = 0
+        for c in color_array:
+            r += int(c[0])
+            g += int(c[1])
+            b += int(c[2])
 
-"""
+        fr = min(r, 255)
+        fg = min(g, 255)
+        fb = min(b, 255)
+        return (fr, fg, fb)
 
-import socket
-import struct
-import sys
-
-SET_PIXEL_COLOURS = 0  # "Set pixel colours" command (see openpixelcontrol.org)
-
+    def hex_to_rgb(self, hex):
+         hex = hex.lstrip('#')
+         hlen = len(hex)
+         return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
 
 class Client(object):
     def __init__(self, server_ip_port, long_connection=True, verbose=False):

@@ -14,6 +14,7 @@ setup(
     },
     install_requires = [
         'requests',
+        'protobuf',
         'Flask'
     ],
     package_data={'mtamapper':['lib/*','bin/*']},

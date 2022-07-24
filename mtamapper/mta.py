@@ -1,5 +1,5 @@
 import os, threading, requests, sys
-from ..utils import EXCLUDE, COMBINE
+from .utils import EXCLUDE, COMBINE
 from . import gtfs_realtime_pb2 as gtfs
 from google.protobuf.message import DecodeError
 
@@ -7,7 +7,7 @@ class MTA():
 
     def __init__(self):
 
-        print("Starting the MTA Data Feed...")
+        print("Initializing the MTA Data Class...")
         self.exclude = EXCLUDE
         self.combine = COMBINE
         self.trains = {}
@@ -17,7 +17,6 @@ class MTA():
         except:
             raise PermissionError("\n\nERROR: MTA Realtime Feed Key (MTA_API_KEY) not found \
             \n\nGet one from: https://api.mta.info/ then add it as MTA_API_KEY in your environment\n")
-        self.active = True
 
 
     def update(self):
