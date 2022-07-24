@@ -20,3 +20,6 @@ def main():
     args = _get_args()
 
     start_server(**args)
+
+if __name__ == '__main__':
+    main()
