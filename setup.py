@@ -17,6 +17,7 @@ setup(
         'protobuf',
         'Flask'
     ],
+    include_package_data=True,
     url='https://github.com/ryan-byrne/mtamapper',
     license='LICENSE.txt',
     description='A Python Package for controlling an LED map of the MTA Subway system',
