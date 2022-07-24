@@ -56,6 +56,8 @@ def _update_thread(client):
             time.sleep(3)
         elif not ACTIVE:
             print("[INFO] Map is inactive")
+            pixels = lights.clear_pixels()
+            client.put_pixels(pixels)
             time.sleep(3)
         else:
             trains = mta.update()
