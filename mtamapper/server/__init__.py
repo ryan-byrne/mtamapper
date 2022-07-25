@@ -55,7 +55,6 @@ def _update_thread(client):
             print("[WARNING] Unable to connect to FadeCandy Server...")
             time.sleep(3)
         elif not ACTIVE:
-            print("[INFO] Map is inactive")
             pixels = lights.clear_pixels()
             client.put_pixels(pixels)
             time.sleep(3)
