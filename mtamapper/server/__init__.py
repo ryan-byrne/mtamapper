@@ -4,9 +4,6 @@ from ..mta import MTA
 from ..lights import Lights, Client
 
 app = Flask(__name__)
-mta = MTA()
-lights = Lights()
-
 ACTIVE = False
 
 @app.route('/stop', methods=['POST'])
@@ -42,15 +39,20 @@ def status():
 def index():
     return render_template("index.html")
 
-def _update_thread(client):
+def _update_thread(ip, port, verbose, startup):
 
-    global ACTIVE
+    client = Client(f"{ip}:{port}", verbose=verbose)
+    mta = MTA()
+    lights = Lights()
 
-    if client.can_connect():
-        # Startup Script
+
+    if client.can_connect() and startup:
         lights.startup(client)
 
     while True:
+
+        global ACTIVE
+
         if not client.can_connect():
             print("[WARNING] Unable to connect to FadeCandy Server...")
             time.sleep(3)
@@ -63,11 +65,11 @@ def _update_thread(client):
             pixels = lights.update_pixels(trains)
             client.put_pixels(pixels)
 
+def run(args):
 
-def start_server(ip="127.0.0.1", http_port="5000", client_port="7890", debug=False, verbose=False):
-    # Connect to Client
-    client = Client(f"{ip}:{client_port}", verbose=verbose, long_connection=True)
-    # Start the update thread
-    threading.Thread(target=_update_thread, args=(client,)).start()
-    # Start the Server
-    app.run(ip, http_port, debug)
+    print([args.ip, args.client_port, args.verbose, args.startup])
+
+    # Start Updating the Trains
+    threading.Thread( target=_update_thread, args=[args.ip, args.client_port, args.verbose, args.startup] ).start()
+    # Start the HTTP Server
+    app.run( host=args.ip, port=args.http_port, debug=args.debug )
